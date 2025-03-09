@@ -74,24 +74,11 @@ rm_1b <- function(n, seed=123, rmSeed=NULL) {
 
 # 2.(a)
 # ================================================================ 
-fibN <- function(n, m, sameInit=F, seed=123, rmSeed=NULL) {
+fibN <- function(n, m, rmSeed=NULL) {
     if (n < m+1) stop("'n' must at least be 'm+1'!")
 
-    # m+1 initial values must be given first
-    # endogenous initial value
-    if (sameInit) 
-        res <- rep(rm_1b(1, seed=seed), m+1)
-    else
-        res <- rm_1b(m+1, seed=seed)
-    
-    # initial value by runif()
-    if (!is.null(rmSeed)) {
-        set.seed(rmSeed)
-        if (sameInit)
-            res <- rep(runif(1), m+1)
-        else
-            res <- runif(m+1)
-    }
+    set.seed(rmSeed)
+    res <- runif(m+1)
 
     i <- m + 2 
     while (i <= (n+m+1)) {

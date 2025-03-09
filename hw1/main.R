@@ -48,13 +48,15 @@ dev.off()
 # 2 (a)
 # ================================================================
 alpha <- 0.05
-maxM <- 50
-n <- 10000
+maxM <- 1000
+n <- 100000
 x.2a <- list()
 for (i in 1:maxM)
     x.2a[[length(x.2a)+1]] <- fibN(n, m=i, rmSeed=2025)
 
-testResult <- sapply(x.2a, FUN = function(x) {
+testResult <- sapply(1:length(x.2a), FUN = function(idx) {
+        x <- x.2a[[idx]]
+        if (any(duplicated(x))) print(paste("ties:", idx))
         # uniform test
         uni.p <- ks.test(x, "punif")$p
 
@@ -69,18 +71,29 @@ testResult <- sapply(x.2a, FUN = function(x) {
 
 testResult <- t(testResult)
 colnames(testResult) <- c("uni.p", "gap.p", "uad.p")
+print(testResult)
 
 save(testResult, 
-     file=paste("2a", "_maxM", maxM, "_n", n, 
-                "_testResults.RData"))
+     file=paste0("2a", "_maxM", maxM, "_n", n, 
+                 "_testResults.RData"))
 
 uniTest <- testResult[, "uni.p"]     < alpha
 
 gapTest.05 <- testResult[, "uad.p"]  < alpha
+
 uadTest.05 <- testResult[, "uni.p"]  < alpha
+
 gapTest.025 <- testResult[, "uad.p"] < (alpha/2)
 uadTest.025 <- testResult[, "uni.p"] < (alpha/2)
+mulTest.05 <- gapTest.025 & uadTest.025
 
+print(which(uniTest))
+
+print(which(gapTest.05))
+
+print(which(uadTest.05))
+
+print(which(mulTest.05))
 
 stop()
 
@@ -271,6 +284,8 @@ stop()
 par(mfrow = c(2, 3))
 for (k in exampleK) {
 }
+
+
 
 # 3 
 # ================================================================
