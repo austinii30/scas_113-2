@@ -124,8 +124,103 @@ rm_2b <- function(n, k, method, rmSeed){
 
 
 
+# Gap Test
+# ================================================================ 
+gapTest <- function(a, b, data) {
+    alpha <- a; beta  <- b
+
+    binary_data <- ifelse(data >= alpha & data <= beta, 1, 0)
+    gaps <- c()  
+
+    count <- 0  
+    for (i in 1:length(binary_data)) {
+        if (binary_data[i] == 1) {
+            gaps <- c(gaps, count)  
+            count <- 0               
+        } else {
+            count <- count + 1       
+        }
+    }
+
+    #如果最後結束時還有未儲存的 gap，則加入 (避免末尾未處理)
+    #if (count > 0) {
+    #    gaps <- c(gaps, count)
+    #}
+
+    gap_table <- table(gaps)
+    gap_freq <- as.numeric(gap_table)
+    gap_values <- as.numeric(names(gap_table))
+    p <- beta - alpha
+    expected <- length(gaps) * (1 - p)^(gap_values) * p
+
+    threshold <- 5  
+    combined_gap_freq <- gap_freq
+    combined_expected <- expected
+
+    #cat("\n\n")
+    #print(combined_expected)
+    # 合併
+    while(sum(combined_expected < threshold) > 1) {
+    #if (any(expected < threshold)) {
+        # 找出過小的部分
+        first_small_idx <- which(expected < threshold)[1]
+        
+        smallExp <- combined_gap_freq[first_small_idx]
+        i <- 0
+        while(smallExp < threshold) {
+            i <- i + 1
+            if (length(combined_gap_freq) < (first_small_idx+i)) {
+                i <- i - 1
+                break
+            }
+
+            smallExp <- smallExp + combined_gap_freq[first_small_idx+i]
+        }
+
+        combined_gap_freq[first_small_idx] <- smallExp
+        deleted_idx <- (1:i) + first_small_idx 
+        combined_gap_freq <- combined_gap_freq[-deleted_idx]
+
+        combined_expected[first_small_idx] <- sum(c(combined_expected[first_small_idx], combined_expected[deleted_idx]))
+        combined_expected <- combined_expected[-deleted_idx]
+    }
+
+    final <- length(combined_gap_freq)
+    if (combined_expected[final] < threshold) {
+        combined_gap_freq[final-1] <- sum(combined_gap_freq[(final-1):final])
+        combined_gap_freq <- combined_gap_freq[-final]
+
+        combined_expected[final-1] <- sum(combined_expected[(final-1):final])
+        combined_expected <- combined_expected[-final]
+    }
+    #print(combined_expected)
+
+#        # 合併到最後一格
+#        combined_gap_freq[length(gap_freq)] <- sum(gap_freq[small_idx])
+#        combined_expected[length(expected)] <- sum(expected[small_idx])
+#        # 刪除過小的部分 (除了最後一格)
+#        combined_gap_freq <- combined_gap_freq[-small_idx[-length(small_idx)]]
+#        combined_expected <- combined_expected[-small_idx[-length(small_idx)]]
+
+    chi_test <- chisq.test(combined_gap_freq, p = combined_expected / sum(combined_expected))
+
+    return(chi_test)
+}
 
 
 
+uadTest <- function(data) {
+    N <- length(data)
 
+    ups_and_downs <- diff(data) > 0
+    runs <- sum(diff(ups_and_downs) != 0)
+    R <- runs+1
+    E_R <- (2*N - 1) / 3
+    Var_R <- (16*N - 29) / 90
+    Z <- (R - E_R) / sqrt(Var_R)
+
+    cd <- pnorm(Z)  # pnorm(): cdf
+    if (cd > 0.5) return((1-cd)*2)
+    else          return(cd*2)
+}
 
