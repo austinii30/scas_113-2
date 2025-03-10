@@ -36,10 +36,10 @@ plot(x=2:maxK, y=res.s, type="n", bty="l", pch=16,
     }
 )
 
-lines(x=2:maxK, y=res.s, col="red", type="o", pch=16)
-lines(x=2:maxK, y=res.c, col="blue", type="o", pch=16)
+lines(x=2:maxK, y=res.s, col="red", type="p", pch=16)
+lines(x=2:maxK, y=res.c, col="blue", type="p", pch=17)
 legend("topleft", legend=c("sample()", "ceiling(runif())"),
-       col=c("red", "blue"), lty=c(1, 1), pch=c(16, 16), 
+       col=c("red", "blue"), lty=c(0, 0), pch=c(16, 17), 
        bg="white", cex=1.5, pt.cex=1)
 
 dev.off()

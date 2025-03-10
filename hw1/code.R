@@ -15,17 +15,17 @@ library(nortest)
 rm_1a <- function(n, seed=123, rmSeed=NULL) {
     # endogenous initial value
     # ex: seed=123, x=1.23; seed=34, x=3.4
-    k = 0
-    while (seed %/% (10^k) != 0)
-       k = k+1 
-    x <- seed / (10^(k-1))
+    #k = 0
+    #while (seed %/% (10^k) != 0)
+    #   k = k+1 
+    #x <- seed / (10^(k-1))
     
     # initial value by runif()
     if (!is.null(rmSeed)) {
         set.seed(rmSeed)
         x <- runif(1)
     }
-
+    
     res <- c()
     for (i in 1:n) {
         x <- exp(x)
@@ -117,12 +117,11 @@ rm_2b <- function(n, k, method, rmSeed){
 # Gap Test
 # ================================================================ 
 gapTest <- function(a, b, data) {
-    alpha <- a; beta  <- b
-
+    alpha <- a; beta <- b
     binary_data <- ifelse(data >= alpha & data <= beta, 1, 0)
     gaps <- c()  
-
     count <- 0  
+
     for (i in 1:length(binary_data)) {
         if (binary_data[i] == 1) {
             gaps <- c(gaps, count)  
@@ -140,59 +139,37 @@ gapTest <- function(a, b, data) {
     gap_table  <- table(gaps)
     gap_freq   <- as.numeric(gap_table)
     gap_values <- as.numeric(names(gap_table))
-    p <- beta - alpha  # success probability
-    expected <- length(gaps) * (1 - p)^(gap_values) * p  # theoretical expectations for each group
-
+    p <- beta - alpha
+    expected <- length(gaps) * (1 - p)^(gap_values) * p
+    
     threshold <- 5  
-    cb_gap_freq <- gap_freq  # realized frequency
-    cb_expected <- expected  # theoretical frequency
-
-    # ensure all groups have NP>5
-    # if more than one group has NP<5, keep looping
-    # for the first group with NP<5, combine it with the next group, until its NP>5
-    # ex: group 5 has NP<5 --> combine group 5 with group 6, 7, ... until NP>5
-    # (if only the last group remains NP<5, it will be dealt with later)
-    while(sum(cb_expected < threshold) > 1) {
-        first_small_idx <- which(expected < threshold)[1]
+    combined_gap_freq <- gap_freq
+    combined_expected <- expected
+    
+    if (any(expected < threshold)) {
+        # 找出過小的部分索引
+        small_idx <- which(expected < threshold)
         
-        # keep binding until NP>5
-        smallExp <- cb_expected[first_small_idx]  # the expectation with NP<5
-        i <- 0  # how many subsequent groups have been added
-        while(smallExp < threshold) {
-            i <- i + 1
-            if (length(cb_expected) < (first_small_idx+i)) {
-                i <- i - 1  # make sure i don't exceed the last group
-                break
+        # 從尾端開始逐步合併直到所有的 expected >= threshold
+        for (i in rev(small_idx)) {
+            if (expected[i] < threshold) {
+                # 合併當前格到前一格
+                if (i > 1) {  # 確保不超出範圍
+                    gap_freq[i - 1] <- gap_freq[i - 1] + gap_freq[i]
+                    expected[i - 1] <- expected[i - 1] + expected[i]
+                }
             }
-
-            smallExp <- smallExp + cb_expected[first_small_idx+i]
         }
-
-        cb_expected[first_small_idx] <- smallExp
-        delete_idx <- (1:i) + first_small_idx 
-        cb_expected <- cb_expected[-delete_idx]
-
-        cb_gap_freq[first_small_idx] <- sum(c(cb_gap_freq[first_small_idx], cb_gap_freq[delete_idx]))
-        cb_gap_freq <- cb_gap_freq[-delete_idx]
+    
+        # 刪除已合併的部分
+        combined_gap_freq <- gap_freq[expected >= threshold]
+        combined_expected <- expected[expected >= threshold]
+    } else {
+        combined_gap_freq <- gap_freq
+        combined_expected <- expected
     }
-
-    final <- length(cb_expected)
-    if (cb_expected[final] < threshold) {
-        cb_expected[final-1] <- sum(cb_expected[(final-1):final])
-        cb_expected <- cb_expected[-final]
-
-        cb_gap_freq[final-1] <- sum(cb_gap_freq[(final-1):final])
-        cb_gap_freq <- cb_gap_freq[-final]
-    }
-
-#        # 合併到最後一格
-#        cb_gap_freq[length(gap_freq)] <- sum(gap_freq[small_idx])
-#        cb_expected[length(expected)] <- sum(expected[small_idx])
-#        # 刪除過小的部分 (除了最後一格)
-#        cb_gap_freq <- cb_gap_freq[-small_idx[-length(small_idx)]]
-#        cb_expected <- cb_expected[-small_idx[-length(small_idx)]]
-
-    chi_test <- chisq.test(cb_gap_freq, p = cb_expected / sum(cb_expected))
+    
+    chi_test <- chisq.test(combined_gap_freq, p = combined_expected / sum(combined_expected))
 
     return(chi_test)
 }

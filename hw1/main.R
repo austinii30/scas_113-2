@@ -27,6 +27,7 @@ print(ks.test(x.1a, "punif"))
 x.1b <- rm_1b(10000, rmSeed=2025)
 print(ks.test(x.1b, "punif"))
 
+stop()
 
 pdf("1a-hist.pdf", width = 8, height = 6, fonts="CNS1")
 #pdf("1b-hist.pdf", width = 8, height = 6, fonts="CNS1")
@@ -85,12 +86,12 @@ save(testResult,
 
 uniTest <- testResult[, "uni.p"]     < alpha
 
-gapTest.05 <- testResult[, "uad.p"]  < alpha
+gapTest.05 <- testResult[, "gap.p"]  < alpha
 
-uadTest.05 <- testResult[, "uni.p"]  < alpha
+uadTest.05 <- testResult[, "uad.p"]  < alpha
 
-gapTest.025 <- testResult[, "uad.p"] < (alpha/2)
-uadTest.025 <- testResult[, "uni.p"] < (alpha/2)
+gapTest.025 <- testResult[, "gap.p"] < (alpha/2)
+uadTest.025 <- testResult[, "uad.p"] < (alpha/2)
 mulTest.05 <- gapTest.025 & uadTest.025
 
 print(which(uniTest))
