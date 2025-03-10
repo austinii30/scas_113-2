@@ -6,6 +6,9 @@
 ############################################################ 
 
 
+library(nortest)
+
+
 
 # 1.(a)
 # ================================================================
@@ -134,62 +137,62 @@ gapTest <- function(a, b, data) {
     #    gaps <- c(gaps, count)
     #}
 
-    gap_table <- table(gaps)
-    gap_freq <- as.numeric(gap_table)
+    gap_table  <- table(gaps)
+    gap_freq   <- as.numeric(gap_table)
     gap_values <- as.numeric(names(gap_table))
-    p <- beta - alpha
-    expected <- length(gaps) * (1 - p)^(gap_values) * p
+    p <- beta - alpha  # success probability
+    expected <- length(gaps) * (1 - p)^(gap_values) * p  # theoretical expectations for each group
 
     threshold <- 5  
-    combined_gap_freq <- gap_freq
-    combined_expected <- expected
+    cb_gap_freq <- gap_freq  # realized frequency
+    cb_expected <- expected  # theoretical frequency
 
-    #cat("\n\n")
-    #print(combined_expected)
-    # 合併
-    while(sum(combined_expected < threshold) > 1) {
-    #if (any(expected < threshold)) {
-        # 找出過小的部分
+    # ensure all groups have NP>5
+    # if more than one group has NP<5, keep looping
+    # for the first group with NP<5, combine it with the next group, until its NP>5
+    # ex: group 5 has NP<5 --> combine group 5 with group 6, 7, ... until NP>5
+    # (if only the last group remains NP<5, it will be dealt with later)
+    while(sum(cb_expected < threshold) > 1) {
         first_small_idx <- which(expected < threshold)[1]
         
-        smallExp <- combined_gap_freq[first_small_idx]
-        i <- 0
+        # keep binding until NP>5
+        smallExp <- cb_expected[first_small_idx]  # the expectation with NP<5
+        i <- 0  # how many subsequent groups have been added
         while(smallExp < threshold) {
             i <- i + 1
-            if (length(combined_gap_freq) < (first_small_idx+i)) {
-                i <- i - 1
+            if (length(cb_expected) < (first_small_idx+i)) {
+                i <- i - 1  # make sure i don't exceed the last group
                 break
             }
 
-            smallExp <- smallExp + combined_gap_freq[first_small_idx+i]
+            smallExp <- smallExp + cb_expected[first_small_idx+i]
         }
 
-        combined_gap_freq[first_small_idx] <- smallExp
-        deleted_idx <- (1:i) + first_small_idx 
-        combined_gap_freq <- combined_gap_freq[-deleted_idx]
+        cb_expected[first_small_idx] <- smallExp
+        delete_idx <- (1:i) + first_small_idx 
+        cb_expected <- cb_expected[-delete_idx]
 
-        combined_expected[first_small_idx] <- sum(c(combined_expected[first_small_idx], combined_expected[deleted_idx]))
-        combined_expected <- combined_expected[-deleted_idx]
+        cb_gap_freq[first_small_idx] <- sum(c(cb_gap_freq[first_small_idx], cb_gap_freq[delete_idx]))
+        cb_gap_freq <- cb_gap_freq[-delete_idx]
     }
 
-    final <- length(combined_gap_freq)
-    if (combined_expected[final] < threshold) {
-        combined_gap_freq[final-1] <- sum(combined_gap_freq[(final-1):final])
-        combined_gap_freq <- combined_gap_freq[-final]
+    final <- length(cb_expected)
+    if (cb_expected[final] < threshold) {
+        cb_expected[final-1] <- sum(cb_expected[(final-1):final])
+        cb_expected <- cb_expected[-final]
 
-        combined_expected[final-1] <- sum(combined_expected[(final-1):final])
-        combined_expected <- combined_expected[-final]
+        cb_gap_freq[final-1] <- sum(cb_gap_freq[(final-1):final])
+        cb_gap_freq <- cb_gap_freq[-final]
     }
-    #print(combined_expected)
 
 #        # 合併到最後一格
-#        combined_gap_freq[length(gap_freq)] <- sum(gap_freq[small_idx])
-#        combined_expected[length(expected)] <- sum(expected[small_idx])
+#        cb_gap_freq[length(gap_freq)] <- sum(gap_freq[small_idx])
+#        cb_expected[length(expected)] <- sum(expected[small_idx])
 #        # 刪除過小的部分 (除了最後一格)
-#        combined_gap_freq <- combined_gap_freq[-small_idx[-length(small_idx)]]
-#        combined_expected <- combined_expected[-small_idx[-length(small_idx)]]
+#        cb_gap_freq <- cb_gap_freq[-small_idx[-length(small_idx)]]
+#        cb_expected <- cb_expected[-small_idx[-length(small_idx)]]
 
-    chi_test <- chisq.test(combined_gap_freq, p = combined_expected / sum(combined_expected))
+    chi_test <- chisq.test(cb_gap_freq, p = cb_expected / sum(cb_expected))
 
     return(chi_test)
 }
@@ -210,4 +213,46 @@ uadTest <- function(data) {
     if (cd > 0.5) return((1-cd)*2)
     else          return(cd*2)
 }
+
+
+
+# 3
+# ================================================================ 
+func3 <- function(n, nIter=1000, seed=2025, alpha=0.05) {
+    set.seed(seed)
+    res <- matrix(0, nrow=4, ncol=3)
+
+    for (i in 1:nIter) { 
+        cat("n = ", n, ", iter = ", i, "\r", sep="")
+        # generate random samples
+        nSample   <- rnorm(n)
+        t10Sample <- rt(n, df = 10)
+        t20Sample <- rt(n, df = 20)
+        samples <- list(nSample, t10Sample, t20Sample)
+
+        # conduct normality tests
+        # store the results in matrix
+        testRes <- sapply(samples, FUN = function(x) {
+                ksP <- ks.test(x, "pnorm")$p
+                adP <- ad.test(x)$p
+                swP <- shapiro.test(x)$p
+                llP <- lillie.test(x)$p
+                return(c(ksP, adP, swP, llP))
+            })
+
+        testRes <- testRes < alpha  # reject or not
+        res <- res + testRes
+    }
+    cat("\n")
+
+    rownames(res) <- c("KS", "AD", "SW", "LL")
+    colnames(res) <- c("N(0,1)", "t(10)", "t(20)")
+    print(res)
+
+    return(res)
+}
+
+
+
+
 
