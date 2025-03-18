@@ -6,23 +6,26 @@
 ############################################################ 
 
 
+library(nortest)
+
+
 
 # 1.(a)
 # ================================================================
 rm_1a <- function(n, seed=123, rmSeed=NULL) {
     # endogenous initial value
     # ex: seed=123, x=1.23; seed=34, x=3.4
-    k = 0
-    while (seed %/% (10^k) != 0)
-       k = k+1 
-    x <- seed / (10^(k-1))
+    #k = 0
+    #while (seed %/% (10^k) != 0)
+    #   k = k+1 
+    #x <- seed / (10^(k-1))
     
     # initial value by runif()
     if (!is.null(rmSeed)) {
         set.seed(rmSeed)
         x <- runif(1)
     }
-
+    
     res <- c()
     for (i in 1:n) {
         x <- exp(x)
@@ -114,12 +117,11 @@ rm_2b <- function(n, k, method, rmSeed){
 # Gap Test
 # ================================================================ 
 gapTest <- function(a, b, data) {
-    alpha <- a; beta  <- b
-
+    alpha <- a; beta <- b
     binary_data <- ifelse(data >= alpha & data <= beta, 1, 0)
     gaps <- c()  
-
     count <- 0  
+
     for (i in 1:length(binary_data)) {
         if (binary_data[i] == 1) {
             gaps <- c(gaps, count)  
@@ -134,61 +136,39 @@ gapTest <- function(a, b, data) {
     #    gaps <- c(gaps, count)
     #}
 
-    gap_table <- table(gaps)
-    gap_freq <- as.numeric(gap_table)
+    gap_table  <- table(gaps)
+    gap_freq   <- as.numeric(gap_table)
     gap_values <- as.numeric(names(gap_table))
     p <- beta - alpha
     expected <- length(gaps) * (1 - p)^(gap_values) * p
-
+    
     threshold <- 5  
     combined_gap_freq <- gap_freq
     combined_expected <- expected
-
-    #cat("\n\n")
-    #print(combined_expected)
-    # 合併
-    while(sum(combined_expected < threshold) > 1) {
-    #if (any(expected < threshold)) {
-        # 找出過小的部分
-        first_small_idx <- which(expected < threshold)[1]
+    
+    if (any(expected < threshold)) {
+        # 找出過小的部分索引
+        small_idx <- which(expected < threshold)
         
-        smallExp <- combined_gap_freq[first_small_idx]
-        i <- 0
-        while(smallExp < threshold) {
-            i <- i + 1
-            if (length(combined_gap_freq) < (first_small_idx+i)) {
-                i <- i - 1
-                break
+        # 從尾端開始逐步合併直到所有的 expected >= threshold
+        for (i in rev(small_idx)) {
+            if (expected[i] < threshold) {
+                # 合併當前格到前一格
+                if (i > 1) {  # 確保不超出範圍
+                    gap_freq[i - 1] <- gap_freq[i - 1] + gap_freq[i]
+                    expected[i - 1] <- expected[i - 1] + expected[i]
+                }
             }
-
-            smallExp <- smallExp + combined_gap_freq[first_small_idx+i]
         }
-
-        combined_gap_freq[first_small_idx] <- smallExp
-        deleted_idx <- (1:i) + first_small_idx 
-        combined_gap_freq <- combined_gap_freq[-deleted_idx]
-
-        combined_expected[first_small_idx] <- sum(c(combined_expected[first_small_idx], combined_expected[deleted_idx]))
-        combined_expected <- combined_expected[-deleted_idx]
+    
+        # 刪除已合併的部分
+        combined_gap_freq <- gap_freq[expected >= threshold]
+        combined_expected <- expected[expected >= threshold]
+    } else {
+        combined_gap_freq <- gap_freq
+        combined_expected <- expected
     }
-
-    final <- length(combined_gap_freq)
-    if (combined_expected[final] < threshold) {
-        combined_gap_freq[final-1] <- sum(combined_gap_freq[(final-1):final])
-        combined_gap_freq <- combined_gap_freq[-final]
-
-        combined_expected[final-1] <- sum(combined_expected[(final-1):final])
-        combined_expected <- combined_expected[-final]
-    }
-    #print(combined_expected)
-
-#        # 合併到最後一格
-#        combined_gap_freq[length(gap_freq)] <- sum(gap_freq[small_idx])
-#        combined_expected[length(expected)] <- sum(expected[small_idx])
-#        # 刪除過小的部分 (除了最後一格)
-#        combined_gap_freq <- combined_gap_freq[-small_idx[-length(small_idx)]]
-#        combined_expected <- combined_expected[-small_idx[-length(small_idx)]]
-
+    
     chi_test <- chisq.test(combined_gap_freq, p = combined_expected / sum(combined_expected))
 
     return(chi_test)
@@ -210,4 +190,46 @@ uadTest <- function(data) {
     if (cd > 0.5) return((1-cd)*2)
     else          return(cd*2)
 }
+
+
+
+# 3
+# ================================================================ 
+func3 <- function(n, nIter=1000, seed=2025, alpha=0.05) {
+    set.seed(seed)
+    res <- matrix(0, nrow=4, ncol=3)
+
+    for (i in 1:nIter) { 
+        cat("n = ", n, ", iter = ", i, "\r", sep="")
+        # generate random samples
+        nSample   <- rnorm(n)
+        t10Sample <- rt(n, df = 10)
+        t20Sample <- rt(n, df = 20)
+        samples <- list(nSample, t10Sample, t20Sample)
+
+        # conduct normality tests
+        # store the results in matrix
+        testRes <- sapply(samples, FUN = function(x) {
+                ksP <- ks.test(x, "pnorm")$p
+                adP <- ad.test(x)$p
+                swP <- shapiro.test(x)$p
+                llP <- lillie.test(x)$p
+                return(c(ksP, adP, swP, llP))
+            })
+
+        testRes <- testRes < alpha  # reject or not
+        res <- res + testRes
+    }
+    cat("\n")
+
+    rownames(res) <- c("KS", "AD", "SW", "LL")
+    colnames(res) <- c("N(0,1)", "t(10)", "t(20)")
+    print(res)
+
+    return(res)
+}
+
+
+
+
 

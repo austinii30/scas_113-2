@@ -8,10 +8,12 @@
 library(showtext)  # display chinese in .pdf files
 showtext_auto()
 
-library(randtoolbox)  # for Gap test
+#library(randtoolbox)  # for Gap test
 source("./code.R")
 
 library(parallel)
+
+
 
 
 # 1 (a)
@@ -25,6 +27,7 @@ print(ks.test(x.1a, "punif"))
 x.1b <- rm_1b(10000, rmSeed=2025)
 print(ks.test(x.1b, "punif"))
 
+stop()
 
 pdf("1a-hist.pdf", width = 8, height = 6, fonts="CNS1")
 #pdf("1b-hist.pdf", width = 8, height = 6, fonts="CNS1")
@@ -49,10 +52,14 @@ dev.off()
 # ================================================================
 alpha <- 0.05
 maxM <- 1000
-n <- 100000
+n <- 10000
 x.2a <- list()
-for (i in 1:maxM)
+cat("2 (a)\n")
+for (i in 1:maxM) {
+    cat(i, "\r")
     x.2a[[length(x.2a)+1]] <- fibN(n, m=i, rmSeed=2025)
+}
+cat("\n")
 
 testResult <- sapply(1:length(x.2a), FUN = function(idx) {
         x <- x.2a[[idx]]
@@ -79,12 +86,12 @@ save(testResult,
 
 uniTest <- testResult[, "uni.p"]     < alpha
 
-gapTest.05 <- testResult[, "uad.p"]  < alpha
+gapTest.05 <- testResult[, "gap.p"]  < alpha
 
-uadTest.05 <- testResult[, "uni.p"]  < alpha
+uadTest.05 <- testResult[, "uad.p"]  < alpha
 
-gapTest.025 <- testResult[, "uad.p"] < (alpha/2)
-uadTest.025 <- testResult[, "uni.p"] < (alpha/2)
+gapTest.025 <- testResult[, "gap.p"] < (alpha/2)
+uadTest.025 <- testResult[, "uad.p"] < (alpha/2)
 mulTest.05 <- gapTest.025 & uadTest.025
 
 print(which(uniTest))
@@ -95,16 +102,17 @@ print(which(uadTest.05))
 
 print(which(mulTest.05))
 
-stop()
+stop("2 (a) done")
 
 
 
 # 2 (b)
 # ================================================================
+cat("2 (b)\n")
 #n <- 10000
 n <- 100000
-#nIter <- 100
-nIter <- 1000
+nIter <- 100
+#nIter <- 1000
 seed <- 2025
 #maxK <- 10   
 maxK <- 1000
@@ -173,20 +181,20 @@ func2b <- function(k) {
             fileName <- paste0("2b_k=", k, "_", method, "_", decision, "_idx", idx,".pdf")
             pdf(fileName, width = 8, height = 6, fonts="CNS1")
 
-            par(mar = c(4.5, 4.5, 0.5, 1.5))
-            par(mgp = c(3.2, 1, 0))
+            par(mar = c(4.5, 5, 0.5, 1.5))
+            par(mgp = c(3, 1, 0))
             
             save(datList, file = paste0(fileName, ".RData"))
 
             if (k <= 10) {
                 barplot(table(dat), prob=T,
-                    las=1, col="orange",
-                    main="", xlab=expression(x[i]), ylab="相對次數",
-                    cex.main=3, cex.axis=1.5, cex.lab=1.6)
+                    las=1, col="orange", bty="l",
+                    main="", xlab=expression(x[i]), ylab="",
+                    cex.main=3, cex.axis=1.5, cex.names=1.5, cex.lab=1.6)
             } else {
                 hist(dat, prob=T,
-                    las=1, col="orange",
-                    main="", xlab=expression(x[i]), ylab="相對次數",
+                    las=1, col="orange", bty="l",
+                    main="", xlab=expression(x[i]), ylab="",
                     cex.main=3, cex.axis=1.5, cex.lab=1.6)
             }
 
@@ -198,7 +206,7 @@ func2b <- function(k) {
 }
 
 # make a cluster, pass all objects in the global into the cluster
-coreNum <- ifelse(detectCores()-2 > 1, detectCores()-2, 1)
+coreNum <- ifelse(detectCores()-4 > 1, detectCores()-4, 1)
 c1 <- makeCluster(coreNum)  # specify number of nodes
 clusterExport(c1, ls()) 
 
@@ -233,7 +241,7 @@ par(mgp = c(2.5, 1, 0))
 
 plot(x=2:maxK, y=res.s, type="n", bty="l", pch=16, 
     xlab = "k",
-    ylab = expression(paste("拒絕", "H"[0], "次數（共", 10, "次）")),
+    ylab = expression(paste("拒絕", "H"[0], "次數（共檢定", 1000, "次）")),
     ylim = c(0, max(res.s, res.c)), 
     cex.axis=1.5, cex.lab=1.5,
     panel.first = {
@@ -280,38 +288,22 @@ stop()
 #stop()
 # ---------- old -------------------------------------------------
 
-# graphical tools
-par(mfrow = c(2, 3))
-for (k in exampleK) {
-}
 
 
 
-# 3 
+# 3  (finished)
 # ================================================================
-N <- 1000
-n10 <- 10; n50 <- 50; n100 <- 100
+cat("3\n")
+testResn10  <- func3(10)
+testResn50  <- func3(50)
+testResn100 <- func3(100)
 
-res <- c()
-#for () {
-#    res <- c(res, rnorm((n10+n50+n100)*N))
+res3 <- cbind(testResn10, testResn50, testResn100)
 
-#}
+save(res3, file="3-testResults.RData")
+write.csv(res3, file="3-testResults.csv")
 
-t10.10  <- rt(10, df = 10)
-t50.10  <- rt(50, df = 10)
-t100.10 <- rt(100, df = 10)
-t10.20  <- rt(10, df = 20)
-t50.20  <- rt(50, df = 20)
-t100.20 <- rt(100, df = 20)
-
-
-
-
-
-
-
-
+stop("Finished 3.")
 
 
 
