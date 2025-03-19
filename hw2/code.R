@@ -9,9 +9,9 @@
 
 
 # 3.(a)
-rN.1 <- function (n, seed=123) {
-    set.seed(seed)
-
+# Don't use this funciton!
+# 'for' is much more slower than 'apply'
+rN.1 <- function (n) {
     Nvec <- c()
     for (i. in 1:n) {
         x <- runif(1)
@@ -26,9 +26,7 @@ rN.1 <- function (n, seed=123) {
     return(Nvec)
 }
 
-rN.2 <- function (n, seed=123) {
-    set.seed(seed)
-
+rN.2 <- function (n) {
     Nvec <- sapply(1:n, FUN = function(i.) {
             x <- runif(1)
             N <- 1 
@@ -41,6 +39,7 @@ rN.2 <- function (n, seed=123) {
 
     return(Nvec)
 }
+
 
 
 
