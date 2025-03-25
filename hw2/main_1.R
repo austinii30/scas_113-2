@@ -9,8 +9,10 @@ source("../../myPKG/R/dfManipulation.R")
 set.seed(2025)
 
 k <- 1000
-#k <- 100
-n <- 100
+#n <- 1000
+#n <- 100
+#n <- 200
+n <- 500
 theta <- c(0, 0.05, 0.1, 0.15, 0.2)
 
 simDat <- list()
@@ -38,9 +40,7 @@ for (dat in simDat) {
 }
 names(simDatCor) <- c("0", "0.05", "0.1", "0.15", "0.2")
 
-
-
-HDB <- function(dat, varName, expPath="") {
+HDB <- function(dat, varName, ct="Set1") {
     "
     Histogram, density, and box plots for numeric and integer variables.
     "
@@ -54,10 +54,12 @@ HDB <- function(dat, varName, expPath="") {
     df <- data.frame(dat)
     colnames(df) <- c(varName)
     
-    colortheme <- "Set1"
+    #colortheme <- "Set1"
+    #colortheme <- "Dark2"
+    colortheme <- ct
     legendPos <- "none"
     titleText <- 16
-    axisText  <- 11
+    axisText  <- 21
     rain_height <- 0.1
     
     # add a variable 'dummy' which all rows have equal value
@@ -68,9 +70,6 @@ HDB <- function(dat, varName, expPath="") {
         if (varName == "dummy") next
 
         dynamicCode <- "
-if (expPath != \"\")
-    pdf(expPath, width = 8, height = 6)
-
 var <- df$`__var__`
 varName <- \"__var__\"
 
@@ -93,9 +92,9 @@ geom_boxplot(width = rain_height, alpha = 0.4, show.legend = FALSE,
 stat_summary(fun = \"mean\", mapping = aes(color = dummy), show.legend = FALSE,
              position = position_nudge(x = rain_height * 3)) +
 # adjust layout
-ggtitle(varName) + 
+#ggtitle(varName) + 
     scale_x_discrete(name = \"\", expand = c(rain_height*3, 0, 0, 0.7)) +
-    scale_y_continuous(name = \"\") + 
+    scale_y_continuous(name = \"\", limits = c(-0.5, 0.5)) + 
     coord_flip() +
     # custom colours and theme
     scale_fill_brewer(palette = colortheme, name = \"Location\") +
@@ -107,14 +106,10 @@ ggtitle(varName) +
           text = element_text(size = 14), 
           plot.title = element_text(size = titleText,  hjust = 0.5),
           axis.text = element_text(size = axisText))
-
-if (expPath != \"\")
-    dev.off()
 "
         dynamicCode <- gsub("__var__", varName, dynamicCode)
-        eval(parse(text=dynamicCode))
+        return(eval(parse(text=dynamicCode)))
     }
-
 }
 
 
@@ -128,23 +123,55 @@ colnames(d) <- c("0_1", "0_2", "0.05_1", "0.05_2",
 d <- data.frame(d)
 ss <- summaryStatistics(d)
 for (i in 1:ncol(ss)) ss[, i] <- round(ss[, i], 3)
-write.table(ss, "ss_1.csv", fileEncoding="UTF-8")
+write.csv(ss, paste0("1(a)_summaryStatistics_n", n, "_k", k, ".csv"))
 
-stop()
 
 # draw HBDs 
-for (i in 1:length(simDatCor)) {
-    for (j in 1:2) {
-        dat <- simDatCor[[i]][, j]
-        varName <- names(simDatCor)[i]
-        #varName <- expression(paste(theta,"=",names(simDatCor)[i]))
-        HDB(dat, varName, paste0(varName, "_", j, ".pdf"))
-    }
+allHBD <- list()
+for (i in 1:ncol(d)) {
+    dat <- d[, i]
+    varName <- colnames(d)[i]
+
+    if (i %% 2 == 0) p <- HDB(dat, varName, "Dark2")
+    else             p <- HDB(dat, varName)
+    allHBD[[length(allHBD)+1]] <- p
+
+    #expPath <- paste0(varName, ".pdf")
+    #pdf(expPath, width = 9, height = 6)
+    #print(p)
+    #dev.off()
 }
+pdf(paste0("1(a)_corHBD_n", n, "_k", k, ".pdf"), width = 18, height = 25)
+grid.arrange(grobs = allHBD, ncol = 2, nrow = 5)
+dev.off()
+
+
+warnings()
+
 
 
 # 1.(b)
+a <- 0.05
+pRes <- matrix(nrow=3, ncol=0)
+pNAs <- matrix(nrow=3, ncol=0)
+for (i in 1:length(simDat)) {
+    dat <- simDat[[i]]
+    p.gap <- apply(dat, 2, FUN = gapTest)
+    p.uad <- apply(dat, 2, FUN = uadTest)
+    p.pmt <- apply(dat, 2, FUN = pmtTest)
+
+    pRes <- cbind(pRes, c(sum(p.gap<a, na.rm=TRUE), 
+                          sum(p.uad<a, na.rm=TRUE), 
+                          sum(p.pmt<a, na.rm=TRUE)))
+    pNAs <- cbind(pNAs, c(sum(is.na(p.gap)), sum(is.na(p.uad)), sum(is.na(p.pmt))))
+}
+colnames(pRes) <- colnames(pNAs) <- names(simDatCor)
+rownames(pRes) <- rownames(pNAs) <- c("Gap", "UaD", "Pmt")
+
+write.csv(pRes, paste0("1(b)_rejH0Times_n", n, "_k", k, "_a", a, ".csv"))
+write.csv(pNAs, paste0("1(b)_cannotTest_n", n, "_k", k, "_a", a, ".csv"))
 
 
+warnings()
 
 

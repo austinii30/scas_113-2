@@ -44,7 +44,7 @@ rN.2 <- function (n) {
 
 
 # Gap Test
-gapTest <- function(a, b, data) {
+gapTest <- function(data, a=0.25, b=0.7) {
     alpha <- a; beta <- b
     binary_data <- ifelse(data >= alpha & data <= beta, 1, 0)
     gaps <- c()  
@@ -73,6 +73,10 @@ gapTest <- function(a, b, data) {
     threshold <- 5  
     combined_gap_freq <- gap_freq
     combined_expected <- expected
+
+    #print("-----------------")
+    #print(combined_gap_freq)
+    #print(combined_expected)
     
     if (any(expected < threshold)) {
         # 找出過小的部分索引
@@ -97,9 +101,14 @@ gapTest <- function(a, b, data) {
         combined_expected <- expected
     }
     
+    #print(combined_gap_freq)
+    if (length(combined_gap_freq) <= 1)
+        return(NA)
+        #stop("Must have at least 2 groups to perform a chi-square test (May arise from small sample size).")
+
     chi_test <- chisq.test(combined_gap_freq, p = combined_expected / sum(combined_expected))
 
-    return(chi_test)
+    return(chi_test$p.value)
 }
 
 
@@ -133,7 +142,10 @@ pmtTest <- function (dat, k=3) {
     rank_strings <- apply(rank_matrix, 1, paste, collapse = "")
     rank_freq <- table(rank_strings)
 
-    chi_test <- chisq.test(rank_freq, p = rep(1/factorial(k), factorial(k)))
+    # add 0 to make sure length of rank_freq is same as factorial(k)
+    rank_freq <- c(rank_freq, rep(0, factorial(k)-length(rank_freq)))
+    chi_test <- chisq.test(rank_freq, p=rep(1/factorial(k), factorial(k)))
     return (chi_test$p.value)
 }
+
 
