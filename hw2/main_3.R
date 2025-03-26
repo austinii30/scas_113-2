@@ -1,7 +1,8 @@
 
 source("code.R")
+
 set.seed(2025)
-nIter <- 10
+k <- 100  # how many pair of samples
 
 # 3.(a)
 n <- c(1000, 2000, 5000, 10000, 100000)
@@ -9,7 +10,7 @@ n <- c(1000, 2000, 5000, 10000, 100000)
 NSamples <- lapply(n, FUN = function(x) {
     # each row is a sample
     return(
-        t(sapply(1:nIter, FUN = function(i.) return(rN.2(x))))
+        t(sapply(1:k, FUN = function(i.) return(rN.2(x))))
     )
 })
 
@@ -21,14 +22,14 @@ Nsd <- sapply(Nmean, FUN = sd)
 
 # calculate the mean of Nbar
 Nmeanavg <- sapply(Nmean, FUN = mean)
-pdf("3.a_mean(Nbar).pdf", width=7, height=5)
+pdf(paste0("3.a_mean(Nbar)_n", n, "_k", k, ".pdf"), width=7, height=5)
 
 par(mar = c(4, 6.3, 1, 1))
 par(mgp = c(4, 1, 0))
 plot(y=Nmeanavg, x=1:5,
      ylab="", xlab="", main="",
-     pch=21, col="black", bg="orange", 
-     cex=1.3, cex.lab=1.3, cex.axis=1.3,
+     pch=21, col="black", bg="orange", type="o",
+     cex=1.8, cex.lab=1.3, cex.axis=1.3,
      yaxt="n", xaxt="n", las=1, bty="l")
 # custom x-axis labels and axis
 axis(1, at=1:5, labels=c("1,000", "2,000", "5,000", "10,000", "100,000"), cex.axis=1.3)  # Custom x-axis labels
@@ -40,18 +41,15 @@ mtext(expression(paste("Mean of ", bar("N"))), side=2, line=4.8, cex=1.3)
 dev.off()
 
 
-# plot the distribution of Nbar
-
-
 # plot sd(N) ~ n
-pdf("3.a_sd(N).pdf", width=7, height=5)
+pdf(paste0("3.a_sd(N)_n", n, "_k", k, ".pdf"), width=7, height=5)
 
 par(mar = c(4, 5.2, 1, 1))
 par(mgp = c(4, 1, 0))
 plot(y=Nsd, x=1:5, 
      ylab="Standard Error of N", xlab="", main="",
      pch=21, col="black", bg="skyblue", 
-     cex=1.3, cex.lab=1.3, cex.axis=1.3,
+     cex=1.8, cex.lab=1.3, cex.axis=1.3, type="o",
      xaxt="n", las=1, bty="l")
 axis(1, at=1:5, labels=c("1,000", "2,000", "5,000", "10,000", "100,000"), cex.axis=1.3)  # Custom x-axis labels
 mtext("n", side=1, line=3, cex=1.3) 
@@ -59,14 +57,27 @@ mtext("n", side=1, line=3, cex=1.3)
 dev.off()
 
 
+# draw HBDs for each plot
+Nmean <- matrix(unlist(Nmean), nrow=k)
+allHBD <- list()
+for (i in 1:ncol(Nmean)) {
+    dat <- Nmean[, i]
+    varName <- rep("", 5)
+    allHBD[[length(allHBD)+1]] <- HDB(dat, varName)
+}
+pdf(paste0("1(a)_corHBD_n", n, "_k", k, ".pdf"), width = 18, height = 15)
+grid.arrange(grobs = allHBD, ncol = 2, nrow = 3)
+dev.off()
 
 
 
 
-
-# 3.(b)
-
-
+# export the estimated results of E(Nbar) and se(N)
+Nexp <- data.frame(Nmeanavg, Nsd)
+TheoNse <- sqrt(3*exp(1)-exp(2)) / sqrt(n)
+Nexp <- cbind(Nexp, TheoNse)
+rownames(Nexp) <- c("n=1,000", "n=2,000", "n=5,000", "n=10,000", "n=100,000")
+write.csv(Nexp, "3(a)-estimates.csv")
 
 stop()
 
