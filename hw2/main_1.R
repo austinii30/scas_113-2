@@ -60,8 +60,8 @@ for (i in 1:ncol(d)) {
     dat <- d[, i]
     varName <- colnames(d)[i]
 
-    if (i %% 2 == 0) p <- HDB(dat, varName, "Dark2")
-    else             p <- HDB(dat, varName)
+    if (i %% 2 == 0) p <- HDB(dat, varName, "Dark2", limits=c(-0.5, 0.5))
+    else             p <- HDB(dat, varName, limits=c(-0.5, 0.5))
     allHBD[[length(allHBD)+1]] <- p
 
     #expPath <- paste0(varName, ".pdf")

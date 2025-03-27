@@ -62,14 +62,13 @@ Nmean <- matrix(unlist(Nmean), nrow=k)
 allHBD <- list()
 for (i in 1:ncol(Nmean)) {
     dat <- Nmean[, i]
-    varName <- rep("", 5)
-    allHBD[[length(allHBD)+1]] <- HDB(dat, varName)
+    varName <- "variable"
+    hist(dat)
+    allHBD[[length(allHBD)+1]] <- HDB(dat, varName, limits=c(2.62, 2.78))
 }
-pdf(paste0("1(a)_corHBD_n", n, "_k", k, ".pdf"), width = 18, height = 15)
+pdf(paste0("3(a)_meanHBD_k", k, ".pdf"), width = 16, height = 15)
 grid.arrange(grobs = allHBD, ncol = 2, nrow = 3)
 dev.off()
-
-
 
 
 # export the estimated results of E(Nbar) and se(N)

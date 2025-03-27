@@ -1,8 +1,8 @@
+source("../../myPKG/R/EDA.R")
 
 
 
-
-HDB <- function(dat, varName, ct="Set1") {
+HDB <- function(dat, varName, ct="Set1", limits=NULL) {
     "
     Histogram, density, and box plots for numeric and integer variables.
     "
@@ -16,9 +16,7 @@ HDB <- function(dat, varName, ct="Set1") {
     df <- data.frame(dat)
     colnames(df) <- c(varName)
     
-    #colortheme <- "Set1"
-    #colortheme <- "Dark2"
-    colortheme <- ct
+    colortheme <- ct     # 'Set1', 'Dark2'
     legendPos <- "none"
     titleText <- 16
     axisText  <- 21
@@ -56,7 +54,7 @@ stat_summary(fun = \"mean\", mapping = aes(color = dummy), show.legend = FALSE,
 # adjust layout
 #ggtitle(varName) + 
     scale_x_discrete(name = \"\", expand = c(rain_height*3, 0, 0, 0.7)) +
-    scale_y_continuous(name = \"\", limits = c(-0.5, 0.5)) + 
+    scale_y_continuous(name = \"\", limits = limits) + 
     coord_flip() +
     # custom colours and theme
     scale_fill_brewer(palette = colortheme, name = \"Location\") +
@@ -220,4 +218,39 @@ pmtTest <- function (dat, k=3) {
     return (chi_test$p.value)
 }
 
+
+
+rnorm_RejExp<- function(n, lambda=1) {
+    " 
+    Sample normal samples by rejection method from an exponential distribution.
+    [Args]
+        n (num)     : amount of samples
+        lambda (num): parameter for the exponential distribution
+
+    [Return]
+        numeric: the numerical vector
+    "
+    normSample <- c()
+
+    C <- lambda/sqrt(2*pi) * exp(1 / (2 * lambda^2))
+    
+    i <- 0
+    k <- 0
+    while (i < n) {
+        u1 <- runif(1); u2 <- runif(1); u3 <- runif(1)
+        k <- k + 1
+
+        x <- (-1) * lambda* log(u1)
+        if (u2 <= (dnorm(x) / (dexp(x, rate=(1/lambda)) * C)))
+            i <- i + 1
+        else
+            next
+        if (u3 < 0.5) x <- x * (-1)
+
+        normSample <- c(normSample, x)
+    }
+
+    res <- list(sample=normSample, nIter=k, acceptRate=(n/k), C=C)
+    return(res)
+}
 
