@@ -1,8 +1,15 @@
+###########################################################
+# Filename: main_1.R
+# Course  : 113-2 Statistical Computation and Simulation, HW2, 
+#           Question 1
+# Author  : Potumas Liu 
+# Date    : 2025/03/24
+###########################################################
 
 source("../../myPKG/R/figure.R")
-source("code.R")
 source("../../myPKG/R/EDA.R")
 source("../../myPKG/R/dfManipulation.R")
+source("code.R")
 
 
 # 1.(a)
@@ -15,8 +22,8 @@ k <- 1000
 n <- 500
 theta <- c(0, 0.05, 0.1, 0.15, 0.2)
 
-simDat <- list()
 # for each theta, draw k random samples, each with n=100
+simDat <- list()
 for (th in theta) {
     dat <- c()
     for (i in 1:k)
@@ -25,7 +32,8 @@ for (th in theta) {
     simDat[[length(simDat)+1]] <- matrix(dat, ncol=k)
 }
 
-# calculate correlation
+
+# correlation
 simDatCor <- list()
 for (dat in simDat) {
     # returns a matirx with 2 rows, each is a correlation
@@ -41,7 +49,7 @@ for (dat in simDat) {
 names(simDatCor) <- c("0", "0.05", "0.1", "0.15", "0.2")
 
 
-# calculate summary statistics
+# summary statistics for autocorrelations 
 d <- simDatCor[[1]]
 for (i in 2:length(simDatCor))
     d <- cbind(d, simDatCor[[i]])
@@ -63,16 +71,10 @@ for (i in 1:ncol(d)) {
     if (i %% 2 == 0) p <- HDB(dat, varName, "Dark2", limits=c(-0.5, 0.5))
     else             p <- HDB(dat, varName, limits=c(-0.5, 0.5))
     allHBD[[length(allHBD)+1]] <- p
-
-    #expPath <- paste0(varName, ".pdf")
-    #pdf(expPath, width = 9, height = 6)
-    #print(p)
-    #dev.off()
 }
 pdf(paste0("1(a)_corHBD_n", n, "_k", k, ".pdf"), width = 18, height = 25)
 grid.arrange(grobs = allHBD, ncol = 2, nrow = 5)
 dev.off()
-
 
 warnings()
 
@@ -99,7 +101,4 @@ rownames(pRes) <- rownames(pNAs) <- c("Gap", "UaD", "Pmt")
 write.csv(pRes, paste0("1(b)_rejH0Times_n", n, "_k", k, "_a", a, ".csv"))
 write.csv(pNAs, paste0("1(b)_cannotTest_n", n, "_k", k, "_a", a, ".csv"))
 
-
 warnings()
-
-

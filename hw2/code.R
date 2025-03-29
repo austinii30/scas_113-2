@@ -1,10 +1,25 @@
-source("../../myPKG/R/EDA.R")
+###########################################################
+# Filename: code.R
+# Course  : 113-2 Statistical Computation and Simulation, HW2,
+#           Some usable functions.
+# Author  : Potumas Liu 
+# Date    : 2025/03/24
+###########################################################
+
+source("../../myPKG/R/EDA.R")  # for HDB()
 
 
 
-HDB <- function(dat, varName, ct="Set1", limits=NULL) {
+HDB <- function(dat, varName="variable", ct="Set1", limits=NULL) {
     "
     Histogram, density, and box plots for numeric and integer variables.
+    [Args]
+        dat (num)     : the data vector
+        varName (char): the name of the variable
+        ct (char)     : the color theme
+        limits (num)  : limit of the x-axis (c(min, max))
+    [Return] 
+        A ggplot object ('print(_obj_)' to plot it)
     "
     #devtools::install_github("psyteachr/introdataviz")
     #install.packages("Hmisc")
@@ -74,12 +89,9 @@ stat_summary(fun = \"mean\", mapping = aes(color = dummy), show.legend = FALSE,
 
 
 
-
-
-
-# 3.(a)
 # Don't use this funciton!
 # 'for' is much more slower than 'apply'
+# Generate N for N=min sum(U)>1 for U ~ unif(0,1)
 rN.1 <- function (n) {
     Nvec <- c()
     for (i. in 1:n) {
@@ -95,6 +107,8 @@ rN.1 <- function (n) {
     return(Nvec)
 }
 
+
+
 rN.2 <- function (n) {
     Nvec <- sapply(1:n, FUN = function(i.) {
             x <- runif(1)
@@ -108,8 +122,6 @@ rN.2 <- function (n) {
 
     return(Nvec)
 }
-
-
 
 
 
@@ -253,4 +265,3 @@ rnorm_RejExp<- function(n, lambda=1) {
     res <- list(sample=normSample, nIter=k, acceptRate=(n/k), C=C)
     return(res)
 }
-

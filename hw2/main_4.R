@@ -1,11 +1,18 @@
+###########################################################
+# Filename: main_4.R
+# Course  : 113-2 Statistical Computation and Simulation, HW2,
+#           Question 4.
+# Author  : Potumas Liu 
+# Date    : 2025/03/24
+###########################################################
+
 source("code.R")
 
 set.seed(2025)
 n <- 10000
 lambda <- 1:100
 
-
-# draw normal samples
+# draw normal samples (can be commented later)
 res <- lapply(lambda, function(x) rnorm_RejExp(n=n, lambda=x))
 save(res, file="4-NormalSampleResults.RData")
 
@@ -28,6 +35,7 @@ plot(x=lambda, y=acpt,
 
 dev.off()
 
+
 # C for each lambda
 Cs <- sapply(res, FUN = function(x) return(x$C))
 pdf("4-C.pdf", width=7, height=5)
@@ -43,13 +51,13 @@ dev.off()
 
 
 # theoretical and sampled distribution of the samples
-# Plot the smoothed density
+# plot the smoothed density
 pickLambda <- c(1, 100)
 pRes <- matrix(ncol=2, nrow=0)
 colnames(pRes) <- c("gofTest.p", "indTest.p")
 
 for (l in pickLambda) {
-    # plot the density
+    # plot density of each sample
     pdf(paste0("4-normal_lambda-", l, ".pdf"), width=7, height=5)
     
     par(mar = c(4, 4, 1, 1))
@@ -71,7 +79,5 @@ for (l in pickLambda) {
     
     pRes <- rbind(pRes, c(gof.p, ind.p))
 }
+
 write.csv(pRes, "4-testResults.csv")
-
-
-stop()

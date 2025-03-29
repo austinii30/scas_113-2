@@ -1,10 +1,16 @@
+###########################################################
+# Filename: main_3.R
+# Course  : 113-2 Statistical Computation and Simulation, HW2,
+#           Question 3(a).
+# Author  : Potumas Liu 
+# Date    : 2025/03/24
+###########################################################
 
 source("code.R")
 
 set.seed(2025)
-k <- 100  # how many pair of samples
+k <- 100  # how many samples for each N
 
-# 3.(a)
 n <- c(1000, 2000, 5000, 10000, 100000)
 # each element is a 'n'
 NSamples <- lapply(n, FUN = function(x) {
@@ -14,13 +20,14 @@ NSamples <- lapply(n, FUN = function(x) {
     )
 })
 
+# sample mean
 Nmean <- lapply(NSamples, FUN = function(mtx) return(rowMeans(mtx)))
 
-
+# sample standard error
 Nsd <- sapply(Nmean, FUN = sd)
 
 
-# calculate the mean of Nbar
+# calculate and plot the mean of Nbar
 Nmeanavg <- sapply(Nmean, FUN = mean)
 pdf(paste0("3.a_mean(Nbar)_n", n, "_k", k, ".pdf"), width=7, height=5)
 
@@ -57,17 +64,16 @@ mtext("n", side=1, line=3, cex=1.3)
 dev.off()
 
 
-# draw HBDs for each plot
+# draw HDBs for each plot
 Nmean <- matrix(unlist(Nmean), nrow=k)
-allHBD <- list()
+allHDB <- list()
 for (i in 1:ncol(Nmean)) {
     dat <- Nmean[, i]
     varName <- "variable"
-    hist(dat)
-    allHBD[[length(allHBD)+1]] <- HDB(dat, varName, limits=c(2.62, 2.78))
+    allHDB[[length(allHDB)+1]] <- HDB(dat, varName, limits=c(2.62, 2.78))
 }
-pdf(paste0("3(a)_meanHBD_k", k, ".pdf"), width = 16, height = 15)
-grid.arrange(grobs = allHBD, ncol = 2, nrow = 3)
+pdf(paste0("3(a)_meanHDB_k", k, ".pdf"), width = 16, height = 15)
+grid.arrange(grobs = allHDB, ncol = 2, nrow = 3)
 dev.off()
 
 
@@ -78,9 +84,10 @@ Nexp <- cbind(Nexp, TheoNse)
 rownames(Nexp) <- c("n=1,000", "n=2,000", "n=5,000", "n=10,000", "n=100,000")
 write.csv(Nexp, "3(a)-estimates.csv")
 
+
 stop()
 
-# test execution time (rN.2 is much faster)
+# test execution time for generating N (rN.2 is much faster)
 beg <- Sys.time()
 rN.1(100000)
 end <- Sys.time()
@@ -90,4 +97,3 @@ beg <- Sys.time()
 rN.2(100000)
 end <- Sys.time()
 cat("rN.2, time: ", beg-end, "\n")
-
