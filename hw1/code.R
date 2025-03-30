@@ -1,6 +1,7 @@
 ############################################################ 
 # Filename: code.R
-# Purpose : 113-2 Statistical Computation and Simulation
+# Purpose : 113-2 Statistical Computation and Simulation, HW1
+#           Some handy functions
 # Author  : Potumas Liu
 # Date    : 2025/03/06
 ############################################################ 
@@ -9,23 +10,12 @@
 library(nortest)
 
 
-
 # 1.(a)
 # ================================================================
-rm_1a <- function(n, seed=123, rmSeed=NULL) {
-    # endogenous initial value
-    # ex: seed=123, x=1.23; seed=34, x=3.4
-    #k = 0
-    #while (seed %/% (10^k) != 0)
-    #   k = k+1 
-    #x <- seed / (10^(k-1))
-    
-    # initial value by runif()
-    if (!is.null(rmSeed)) {
-        set.seed(rmSeed)
-        x <- runif(1)
-    }
-    
+rm_1a <- function(n, seed=2025) {
+    set.seed(seed)
+
+    x <- runif(1)
     res <- c()
     for (i in 1:n) {
         x <- exp(x)
@@ -41,21 +31,13 @@ rm_1a <- function(n, seed=123, rmSeed=NULL) {
 
 # 1.(b)
 # ================================================================
-rm_1b <- function(n, seed=123, rmSeed=NULL) {
+rm_1b <- function(n, seed=2025) {
     modX <- 30269; modY <- 30307; modZ <- 30323
     mltX <- 171  ; mltY <- 172  ; mltZ <- 170
 
-    # endogenous initial value
-    # ex: seed=123, x=1.23; seed=34, x=3.4
-    x <- seed/mltX+modX
-    y <- seed/mltY+modY  
-    z <- seed/mltZ+modZ
-
-    # initial value by runif()
-    if (!is.null(rmSeed)) {
-        set.seed(rmSeed)
-        x <- runif(1); y <- runif(1); z <- runif(1)
-    }
+    # initial value 
+    set.seed(seed)
+    x <- runif(1); y <- runif(1); z <- runif(1)
 
     res <- c()
     for (i in 1:n) {
@@ -71,16 +53,14 @@ rm_1b <- function(n, seed=123, rmSeed=NULL) {
     return(res)
 }
 
-# ================================================================
-
 
 
 # 2.(a)
 # ================================================================ 
-fibN <- function(n, m, rmSeed=NULL) {
+fibN <- function(n, m, seed=2025) {
     if (n < m+1) stop("'n' must at least be 'm+1'!")
 
-    set.seed(rmSeed)
+    set.seed(seed)
     res <- runif(m+1)
 
     i <- m + 2 
@@ -97,11 +77,11 @@ fibN <- function(n, m, rmSeed=NULL) {
 
 # 2.(b)
 # ================================================================ 
-rm_2b <- function(n, k, method, rmSeed){
+rm_2b <- function(n, k, method, seed=2025) {
     if (!method %in% c("sample", "ceiling"))
         stop("'method' should only be 'sample' or 'ceiling'")
 
-    set.seed(rmSeed)
+    set.seed(seed)
 
     if (method == "sample")
         res <- sample(1:k, n, replace=T)     
@@ -114,7 +94,7 @@ rm_2b <- function(n, k, method, rmSeed){
 
 
 
-# Gap Test
+# Gap Test (returns 'chisq.test()' object)
 # ================================================================ 
 gapTest <- function(a, b, data) {
     alpha <- a; beta <- b
@@ -176,6 +156,7 @@ gapTest <- function(a, b, data) {
 
 
 
+# Up and Down Test (returns the p-value)
 uadTest <- function(data) {
     N <- length(data)
 
@@ -228,8 +209,3 @@ func3 <- function(n, nIter=1000, seed=2025, alpha=0.05) {
 
     return(res)
 }
-
-
-
-
-

@@ -1,6 +1,6 @@
 ############################################################ 
 # Filename: main.R
-# Purpose : 113-2 Statistical Computation and Simulation
+# Purpose : 113-2 Statistical Computation and Simulation, HW1
 # Author  : Potumas Liu
 # Date    : 2025/03/06
 ############################################################ 
@@ -8,43 +8,40 @@
 library(showtext)  # display chinese in .pdf files
 showtext_auto()
 
-#library(randtoolbox)  # for Gap test
-source("./code.R")
-
 library(parallel)
 
+source("code.R")
 
 
 
 # 1 (a)
 # ================================================================
-x.1a <- rm_1a(10000, rmSeed=2025)
+x.1a <- rm_1a(10000, seed=2025)
 print(ks.test(x.1a, "punif"))
 
 
 # 1 (b)
 # ================================================================
-x.1b <- rm_1b(10000, rmSeed=2025)
+x.1b <- rm_1b(10000, seed=2025)
 print(ks.test(x.1b, "punif"))
 
-stop()
+datNames <- c("1a", "1b")
+dats <- list(x.1a, x.1b)
+for (i in 1:length(dats)) {
+    data <- dats[[i]]
+    pdf(paste0(datNames[i], "-hist.pdf"), width=8, height=6, fonts="CNS1")
 
-pdf("1a-hist.pdf", width = 8, height = 6, fonts="CNS1")
-#pdf("1b-hist.pdf", width = 8, height = 6, fonts="CNS1")
-
-par(mar = c(4.5, 4.5, 0.5, 1.5))  # Lower the bottom margin (the 1st value)
-par(font.main = 1)  # 1: normal, 2: bold
-par(mgp = c(3.2, 1, 0))
-
-data <- x.1a
-#data <- x.1b
-
-hist(data, prob=T,
-    las=1, col="orange",
-    main="", xlab=expression(x[i]), ylab="相對次數",
-    cex.main=3, cex.axis=1.5, cex.lab=1.6)
-
-dev.off()
+    par(mar = c(4.5, 4.5, 0.5, 1.5))  
+    par(font.main = 1)  # 1: normal, 2: bold
+    par(mgp = c(3.2, 1, 0))
+    
+    hist(data, prob=T,
+        las=1, col="orange",
+        main="", xlab=expression(x[i]), ylab="相對次數",
+        cex.main=3, cex.axis=1.5, cex.lab=1.6)
+    
+    dev.off()
+}
 
 
 
@@ -57,7 +54,7 @@ x.2a <- list()
 cat("2 (a)\n")
 for (i in 1:maxM) {
     cat(i, "\r")
-    x.2a[[length(x.2a)+1]] <- fibN(n, m=i, rmSeed=2025)
+    x.2a[[length(x.2a)+1]] <- fibN(n, m=i, seed=2025)
 }
 cat("\n")
 
@@ -78,7 +75,6 @@ testResult <- sapply(1:length(x.2a), FUN = function(idx) {
 
 testResult <- t(testResult)
 colnames(testResult) <- c("uni.p", "gap.p", "uad.p")
-print(testResult)
 
 save(testResult, 
      file=paste0("2a", "_maxM", maxM, "_n", n, 
@@ -87,34 +83,21 @@ save(testResult,
 uniTest <- testResult[, "uni.p"]     < alpha
 
 gapTest.05 <- testResult[, "gap.p"]  < alpha
-
 uadTest.05 <- testResult[, "uad.p"]  < alpha
 
 gapTest.025 <- testResult[, "gap.p"] < (alpha/2)
 uadTest.025 <- testResult[, "uad.p"] < (alpha/2)
 mulTest.05 <- gapTest.025 & uadTest.025
 
-print(which(uniTest))
-
-print(which(gapTest.05))
-
-print(which(uadTest.05))
-
-print(which(mulTest.05))
-
-stop("2 (a) done")
-
 
 
 # 2 (b)
 # ================================================================
 cat("2 (b)\n")
-#n <- 10000
+
 n <- 100000
 nIter <- 100
-#nIter <- 1000
 seed <- 2025
-#maxK <- 10   
 maxK <- 1000
 alpha <- 0.05
 
@@ -150,8 +133,6 @@ func2b <- function(k) {
     rejects <- pValues < alpha
     rej.s <- sum(rejects[, "sample"])
     rej.c <- sum(rejects[, "ceiling"])
-
-    #return(c(rej.s, rej.c))
 
     if (k %in% exampleK) {
         acpIdx.s <- which(rejects[, "sample"]==F)[1]
@@ -262,36 +243,8 @@ legend("topleft", legend=c("sample()", "ceiling(runif())"),
 
 dev.off()
 
-stop()
 
-# ---------- old -------------------------------------------------
-#for (k in K) {
-#    x.s <- c(x.s, rm_2b(n, k, "sample", rmSeed=2025))
-#    x.c <- c(x.c, rm_2b(n, k, "ceiling", rmSeed=2025))
-#}
-
-# each column is a random number sample of size n
-#x.s <- matrix(x.s, nrow = n)
-#x.c <- matrix(x.c, nrow = n)
-#x.all <- cbind(x.s, x.c)
-
-#pValues <- c()
-#for (i in 1:ncol(x.all)) {
-#    p <- chisq.test(table(x.all[, i]))$p.value
-#    pValues <- c(pValues, p)
-#}
-#pValues <- matrix(pValues, ncol=2, 
-#                  dimnames = list(k=K, 
-#                                  method=c("sample", "ceiling")))
-#print(pValues)
-#
-#stop()
-# ---------- old -------------------------------------------------
-
-
-
-
-# 3  (finished)
+# 3 
 # ================================================================
 cat("3\n")
 testResn10  <- func3(10)
@@ -302,13 +255,3 @@ res3 <- cbind(testResn10, testResn50, testResn100)
 
 save(res3, file="3-testResults.RData")
 write.csv(res3, file="3-testResults.csv")
-
-stop("Finished 3.")
-
-
-
-
-
-
-
-

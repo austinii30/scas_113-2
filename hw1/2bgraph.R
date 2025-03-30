@@ -1,8 +1,14 @@
+############################################################ 
+# Filename: 2bgraph.R
+# Purpose : 113-2 Statistical Computation and Simulation, HW1
+#           Plots for Question 2 (b).
+# Author  : Potumas Liu
+# Date    : 2025/03/10
+############################################################ 
+
 n <- 100000
 nIter <- 100
-#nIter <- 1000
 seed <- 2025
-#maxK <- 10   
 maxK <- 1000
 alpha <- 0.05
 
@@ -15,10 +21,11 @@ load("./2(b)_seed2025_n1e+05_nIter100_maxK1000_alpha0.05.RData")
 res.s <- clusterRes[[1]]
 res.c <- clusterRes[[2]]
 
+
 # plot the results
 pdf("2bPlot.pdf", width = 10, height = 6, fonts="CNS1")
 
-par(mar = c(4.5, 4.5, 0.5, 1.5))  # Lower the bottom margin (the 1st value)
+par(mar = c(4.5, 4.5, 0.5, 1.5)) 
 par(mgp = c(2.5, 1, 0))  
 
 plot(x=2:maxK, y=res.s, type="n", bty="l", pch=16, 
@@ -43,4 +50,3 @@ legend("topleft", legend=c("sample()", "ceiling(runif())"),
        bg="white", cex=1.5, pt.cex=1)
 
 dev.off()
-
