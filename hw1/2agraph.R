@@ -1,8 +1,13 @@
+############################################################ 
+# Filename: 2agraph.R
+# Purpose : 113-2 Statistical Computation and Simulation, HW1
+#           Plots for Question 2 (a).
+# Author  : Potumas Liu
+# Date    : 2025/03/10
+############################################################ 
 
 library(showtext)  # display chinese in .pdf files
 showtext_auto()
-
-#library(randtoolbox)  # for Gap test
 
 
 ksRes <- c(40, 65, 67, 91, 108, 152, 171, 198, 201, 202, 212, 261, 265, 297, 313, 334, 406, 421, 435, 436, 444, 475, 478, 526, 529, 552, 573, 590, 600, 606, 608, 626, 654, 655, 663, 692, 734, 737, 757, 777, 778, 814, 860, 880, 886, 939)
@@ -20,10 +25,9 @@ for (i in 1:length(res)) {
 
     pdf(paste0("2a-", datName, ".pdf"), width = 6, height = 6, fonts="CNS1")
     
-    par(mar = c(4, 4.5, 0.5, 1.5))  # Lower the bottom margin (the 1st value)
+    par(mar = c(4, 4.5, 0.5, 1.5))  
     par(font.main = 1)  # 1: normal, 2: bold
     par(mgp = c(3, 1, 0))
-    
     
     hist(data,
         las=1, col="orange",
@@ -31,9 +35,4 @@ for (i in 1:length(res)) {
         cex.main=3, cex.axis=1.5, cex.lab=1.6)
     
     dev.off()
-
 }
-
-
-
-
