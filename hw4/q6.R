@@ -24,7 +24,6 @@ clusterExport(c1, ls())
 
 
 # monte carlo
-#mcRes <- sapply(xs, FUN = function(x) {
 mcRes <- parSapply(c1, 1:nIter, FUN = function (i) {
         simX <- sapply(1:nrv, FUN = function (j) { return(j*rexp(n)) })
         simX <- rowSums(simX)
@@ -37,7 +36,6 @@ cat(m, ", estimate: ", mcRes.mu, ", variance: ", mcRes.var, "\n", sep="")
 
 # important sampling
 # assume p(x) is a half normal: f(x) = sqrt(2/pi) * exp{-x^2/2}
-#isRes <- sapply(xs, FUN = function(x) {
 isRes <- parSapply(c1, 1:nIter, FUN = function (i) {
         #simX <- sapply(1:nrv, function (j) { return(abs(rnorm(n))) })
         simX <- sapply(1:nrv, function (j) { return(rexp(n, rate=0.8)) })
@@ -55,7 +53,6 @@ cat(m, ", estimate: ", isRes.mu, ", variance: ", isRes.var, "\n", sep="")
 
 
 # Control Variable
-#cvRes <- sapply(xs, FUN = function(x) {
 cvRes <- parSapply(c1, 1:nIter, FUN = function (i) {
         simU <- sapply(1:nrv, function (j) { return(runif(n)) })
         simExp  <- -log(simU)
@@ -64,8 +61,9 @@ cvRes <- parSapply(c1, 1:nIter, FUN = function (i) {
 
         yth <- 1
         simY <- apply(simExp < yth, 1, prod)
+        a <- 1 / ((1-exp(-1))^5 - (1-exp(-1))^10)
 
-        return( mean(simX - (simY-(1-exp(-1))^5)) )
+        return( mean(simX - (0.1)*(simY-(1-exp(-1))^5)) )
     })
 cvRes.mu <- mean(cvRes); cvRes.var <- var(cvRes)
 m <- "Control Variable"

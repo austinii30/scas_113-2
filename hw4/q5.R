@@ -10,7 +10,7 @@ library(parallel)
 library(VGAM, quietly=TRUE)  # bivariate normal evaluation
 
 n <- 1000000
-nIter <- 50
+nIter <- 100
 rhos <- c(0.7, 0.3, 0, -0.5, -0.9)
 ks <- c(0, 1, 2, 3, 4)
 mu1 <- mu2 <- 0
@@ -34,15 +34,8 @@ Res <- parLapply(c1, rhos, fun = function(rho) {
         library(VGAM)
         kRes <- sapply(ks, FUN = function (k) {
             simMean <- sapply(1:nIter, FUN = function(i) {
-                #m <- "Monte Carlo"
-                #cat(m, ", k=", k, ", rho=", rho, 
-                #    ", iter ", i, "    \r", sep="")
-                #Sigma[0, 1] <- Sigma[1, 0] <- rho
-                #simX <- mvrnorm(n, mu=c(mu1, mu2), Sigma=Sigma)
-                #return( mean(simX < k) )  
                 simX <- rbinorm(n, cov12=rho)
                 xy <- rowSums(simX)
-
                 return( mean(xy < k) )
             })
             cat("\nP(X+Y<", k,") = ", mean(simMean), "\n", sep="")
@@ -62,21 +55,27 @@ for (i in 1:length(ks)) {
 
 
 # important sampling
-#Res <- sapply(xs, FUN = function(x) {
 Res <- parLapply(c1, rhos, fun = function(rho) {
         library(VGAM)
         kRes <- sapply(ks, FUN = function (k) {
             simMean <- sapply(1:nIter, FUN = function(i) {
-                #m <- "Important Sampling"
-                #cat(m, ", k=", k, ", rho=", rho, 
-                #    ", iter ", i, "    \r", sep="")
+                # simulate the data
+                simXY <- simX <- simY <- c()
+                while(length(simXY) < n) {
+                    sX <- rexp(n) * ((runif(n)>0.5)*2-1)
+                    sY <- rexp(n) * ((runif(n)>0.5)*2-1)
+                    sXY <- sX + sY
+                    idx <- which(sXY < k)
+                    simXY <- c(simXY, sXY[idx])
+                    simX <- c(simX, sX[idx]); simY <- c(simY, sY[idx])
+                }
+                simXY <- simXY[1:n]; simX <- simX[1:n]; simY <- simY[1:n]
 
-                simX <- rexp(n) * ((runif(n)>0.5)*2-1)
-                simY <- rexp(n) * ((runif(n)>0.5)*2-1)
-                xy <- simX + simY
+                prob <- 0.25 + 0.25*(1 - exp(-k)*(1+k)) + 
+                        2*(0.25 - 0.125*exp(-k))
 
-                simDat <- (xy<k) * dbinorm(simX, simY, cov12=rho) / 
-                        (dexp(abs(simX))*dexp(abs(simY))/4)
+                simDat <- (simXY<k) * dbinorm(simX, simY, cov12=rho) / 
+                    ((simXY<k)*dexp(abs(simX))*dexp(abs(simY))/(4*prob))
 
                 return( mean(simDat) )
             })
@@ -96,21 +95,13 @@ for (i in 1:length(ks)) {
 }
 
 
-
 # Antithetic Variable
-#Res <- sapply(xs, FUN = function(x) {
 Res <- parLapply(c1, rhos, fun = function(rho) {
         library(VGAM)
         kRes <- sapply(ks, FUN = function (k) {
             simMean <- sapply(1:nIter, FUN = function(i) {
-                #m <- "Antithetic Variable"
-                #cat(m, ", k=", k, ", rho=", rho, 
-                #    ", iter ", i, "    \r", sep="")
-
-                
                 simX <- rbinorm(n, cov12=rho)
                 xy <- rowSums(simX)
-
                 return( mean((k > xy) + (k > (-xy))) / 2 )
             })
             cat("\nP(X+Y<", k,") = ", mean(simMean), "\n", sep="")
@@ -130,23 +121,15 @@ for (i in 1:length(ks)) {
 
 
 # Control Variable
-#Res <- lapply(rhos, FUN = function(rho) {
 Res <- parLapply(c1, rhos, fun = function(rho) {
-        library(VGAM)#; library(MASS)
+        library(VGAM)
         kRes <- sapply(ks, FUN = function (k) {
             simMean <- sapply(1:nIter, FUN = function(i) {
-                #m <- "Antithetic Variable"
-                #cat(m, ", k=", k, ", rho=", rho, 
-                #    ", iter ", i, "    \r", sep="")
-                
-                #Sigma[1, 2] <- Sigma[2, 1] <- rho
-                #simX <- mvrnorm(n, mu=c(0, 0), Sigma=Sigma)
                 simX <- rbinorm(n, cov12=rho)
                 xy <- rowSums(simX)
 
                 xy1 <- xy < k
                 xy2 <- xy < 0
-                #print(mean(xy2 > 0.5))
                 return( mean(xy1 - (xy2-0.5)) )
             })
             cat("\nP(X+Y<", k,") = ", mean(simMean), "\n", sep="")
