@@ -7,13 +7,16 @@
 
 library(parallel)
 
-n <- 10000000
-nIter <- 100
+n <- 1000000
+nIter <- 1000
 xs <- c(-2, -2.5, -3, -3.5, -4, -5, -6) 
 
-set.seed(2025)
+RNGkind("L'Ecuyer-CMRG")
+seed <- 2025
+set.seed(seed)
 
 c1 <- makeCluster(12)
+clusterSetRNGStream(c1, seed)
 clusterExport(c1, ls())
 
 
@@ -37,14 +40,17 @@ mcRes
 
 
 # important sampling
-# assume p(x) is a folded exponential, lambda=1
-#ipRes <- sapply(xs, FUN = function(x) {
-ipRes <- sapply(xs, FUN = function(x) {
+# assume p(x) is a double exponential, lambda=1
+#isRes <- sapply(xs, FUN = function(x) {
+isRes <- sapply(xs, FUN = function(x) {
         simMean <- parSapply(c1, 1:nIter, FUN = function(i){
             #m <- "Important Sampling"
             #cat(m, ", x = ", x, ", iter ", i, "    \r", sep="")
-            simX <- rexp(n) * ((runif(n)>0.5)*2-1)
-            simX <- (x>simX) * dnorm(simX) / (dexp(abs(simX))/2)
+            #simX <- rexp(n) * ((runif(n)>0.5)*2-1)
+            #simX <- (x>simX) * dnorm(simX) / (dexp(abs(simX))/2)
+            simExp <- rexp(n) 
+            simX <- simExp - x
+            simX <- (-x<simX) * dnorm(simX) / dexp(simExp)
             return(mean(simX)) 
         })
         m <- "Important Sampling"
@@ -52,7 +58,7 @@ ipRes <- sapply(xs, FUN = function(x) {
         #return(var(simMean))
         return(c(var(simMean), mean(simMean)))
     })
-ipRes
+isRes
 
 
 # antithetic variable
@@ -77,7 +83,7 @@ avRes
 #cvRes <- sapply(xs, FUN = function(x) {
 cvRes <- sapply(xs, FUN = function(x) {
         simMean <- parSapply(c1, 1:nIter, FUN = function(i){
-            #m <- "Control Variate"
+            #m <- "Control Variable"
             #cat(m, ", x = ", x, ", iter ", i, "    \r", sep="")
             # generate 2 iid Unif variable s.t. U^2+V^2<1
             #U <- runif(n*1.4, min=-1); V <- runif(n*1.4, min=-1)
@@ -96,7 +102,7 @@ cvRes <- sapply(xs, FUN = function(x) {
             a <- E.X1 / 0.025
             return( mean( simX1 - a*(simX2-0.025) ) )
         })
-        m <- "Control Variate"
+        m <- "Control Variable"
         cat(m, ", x = ", x, ", pnorm(", x, ") = ", mean(simMean), ", s.e. = ", var(simMean), "\n", sep="")
         #return(var(simMean))
         return(c(var(simMean), mean(simMean)))
@@ -104,3 +110,12 @@ cvRes <- sapply(xs, FUN = function(x) {
 cvRes
 
 stopCluster(c1)
+
+
+# export results
+resMtx <- cbind(t(mcRes), t(isRes), t(avRes), t(cvRes))
+colnames(resMtx) <- c("mc.var", "mc.mean", "ip.var", "ip.mean",
+                      "av.var", "av.mean", "cv.var", "cv.mean")
+rownames(resMtx) <- xs
+fileName <- paste0("_n-", n, "_runs-", nIter, "_seed-", seed)
+write.csv(resMtx, paste0("q4-results", fileName, ".csv"))
