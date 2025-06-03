@@ -32,13 +32,23 @@ for (idx in 1:ncol(dat)) {
 # no missing values
 print(nrow(dat[!complete.cases(dat), ]))
 
+# formula
+mod <- formula(low ~ 
+    age + 
+    lwt + 
+    race + 
+    smoke + 
+    #ptl + 
+    ht + 
+    ui  
+    #ftv 
+)
 
-glmfit <- glm(low ~ ., binomial, dat)
+glmfit <- glm(mod, binomial, dat)
 
 summary(glmfit)
 
-
-posterior <- MCMClogit(low ~ ., data=dat, 
+posterior <- MCMClogit(mod, data=dat, 
                        burnin=20000, mcmc=30000)
                        #verbose=5000)
 
