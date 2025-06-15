@@ -86,3 +86,8 @@ plot2d <- function (x, y, z,
 }
 
 
+invDist <- function (mtx) {
+    mtx <- 1/mtx
+    diag(mtx) <- 0
+    return(mtx)
+}
