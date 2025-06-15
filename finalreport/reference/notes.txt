@@ -1,0 +1,13 @@
+Moran's I
+Sigma vs. sigma
+Monte-Carlo test
+LRT-test
+AICc
+CV
+
+spatial autocorrelation vs. nonstationary
+
+Global Linear Regression
+Standard GWR
+MS-GWR
+MXGWR (mixed GWR)

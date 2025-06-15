@@ -13,29 +13,50 @@ load(datpath("datgwr.RData"))
 
 xlim <- c(0, 10)
 ylim <- c(0, 10)
+zlim <- c(-1, 1)
 
+gwrpar0 <- function(x, y) { return( (x-y)/10 ) }
+gwrpar1 <- function(x, y) { return( (sin(x/0.5)+cos(y/0.8))/2 ) }
+gwrpar2 <- function(x, y) { return( exp(-((x-2.5)^2+(y-3)^2)/2) + exp(-((x-8)^2+(y-6)^2)/4) - exp(-((x-7)^2+(y-2)^2)/0.8) - exp(-((x-4)^2+(y-8)^2)/1.5)) }
+gwrpar3 <- function(x, y) { return( exp(-(y-2*(x-1))^2/3) + exp(-(3*(y-3)-x)^2/10) - 1) }
+gwrparfuncs <- c(gwrpar0, gwrpar1, gwrpar2, gwrpar3)
+
+# --------------------------------------------
+# exact plots for each covariate
+# --------------------------------------------
+pdf(outpath("gwr-covariates.pdf"), width=8, height=6.5)
+for (gf in gwrparfuncs) {
+    x <- seq(0, 10, length.out=200)
+    y <- seq(0, 10, length.out=200)
+    z <- outer(x, y, gf)
+    print(max(z))
+    print(min(z))
+    plot2d(x, y, z, xlim, ylim, zlim, ke=FALSE) 
+}
+dev.off()
+stop()
 
 # --------------------------------------------
 # sample location
 # --------------------------------------------
-pdf(outpath("dat-location.pdf"))
-for (i in 1:length(datlm)) {
-    plot(x=datlm[[i]][, "x"], y=datlm[[i]][, "y"]) 
-}
-dev.off()
+#pdf(outpath("dat-location.pdf"))
+#for (i in 1:length(datlm)) {
+#    plot(x=datlm[[i]][, "x"], y=datlm[[i]][, "y"]) 
+#}
+#dev.off()
 
 
 # --------------------------------------------
 # LM: sample response
 # --------------------------------------------
-pdf(outpath("lm-response.pdf"), width=8, height=6.5)
-for (i in 1:length(datlm)) {
-    x <- datlm[[i]][, "x"]
-    y <- datlm[[i]][, "y"]
-    z <- datlm[[i]][, "response"]
-    plot2d(x, y, z, xlim, ylim)
-}
-dev.off()
+#pdf(outpath("lm-response.pdf"), width=8, height=6.5)
+#for (i in 1:length(datlm)) {
+#    x <- datlm[[i]][, "x"]
+#    y <- datlm[[i]][, "y"]
+#    z <- datlm[[i]][, "response"]
+#    plot2d(x, y, z, xlim, ylim)
+#}
+#dev.off()
 
 
 # --------------------------------------------
@@ -49,7 +70,6 @@ for (i in 1:length(datgwr)) {
     plot2d(x, y, z, xlim, ylim)
 }
 dev.off()
-
 
 # --------------------------------------------
 # GWR: covariates

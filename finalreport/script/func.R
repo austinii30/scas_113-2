@@ -32,27 +32,27 @@ kernel_smooth_grid <- function(xo1, xo2, y, xn1, xn2, h1, h2) {
   return(z_mat)
 }
 
-xlim <- c(0, 10)
-ylim <- c(0, 10)
-zlim <- NULL
 
 plot2d <- function (x, y, z, 
                     xlcd, ylcd, zlcd=range(z, finite=TRUE), 
-                    grid.size=200) {
+                    grid.size=200, ke=TRUE) {
 
-    # Step 3: Prediction grid
-    grid.x <- seq(xlcd[1], xlcd[2], length.out=grid.size)
-    grid.y <- seq(ylcd[1], ylcd[2], length.out=grid.size)
-    grid.coords <- expand.grid(grid.x, grid.y)
-    colnames(grid.coords) <- c("x", "y")
+    dens <- list(x=x, y=y, z=z)
 
-    z.matrix <- kernel_smooth_grid(x, y, z, grid.x, grid.y, 0.2, 0.2)
+    if (ke) {
+        # Prediction grid
+        grid.x <- seq(xlcd[1], xlcd[2], length.out=grid.size)
+        grid.y <- seq(ylcd[1], ylcd[2], length.out=grid.size)
+        grid.coords <- expand.grid(grid.x, grid.y)
+        colnames(grid.coords) <- c("x", "y")
+        z.matrix <- kernel_smooth_grid(x, y, z, grid.x, grid.y, 0.2, 0.2)
 
-    dens <- list(
-        x=grid.x,
-        y=grid.y,
-        z=z.matrix
-    )
+        dens <- list(
+            x=grid.x,
+            y=grid.y,
+            z=z.matrix
+        )
+    }
 
     # Plot with a square aspect ratio and a tall legend
     par(mar = c(4.5, 5.5, 0.5, 6))  # Extra space on right for the legend

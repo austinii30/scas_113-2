@@ -19,8 +19,8 @@ varnames <- c("response", "x", "y", "x1", "x2", "x3", "error")
 lmparas <- c(0.3, 0.7, -0.8, 0.5)  # betas for LM
 gwrpar0 <- function(x, y) { return( (x-y)/10 ) }
 gwrpar1 <- function(x, y) { return( (sin(x/0.5)+cos(y/0.8))/2 ) }
-gwrpar2 <- function(x, y) { return( exp(-((x-3)^2+(y-3)^2)/2) + exp(-((x-8)^2+(y-6)^2)/5) - exp(-((x-7)^2+(y-2)^2)/0.8) - exp(-((x-4)^2+(y-8)^2)/1.5)) }
-gwrpar3 <- function(x, y) { return( exp(-(y-2*x)^2/3) + exp(-(3*y-x)^2/10) ) }
+gwrpar2 <- function(x, y) { return( exp(-((x-2.5)^2+(y-3)^2)/2) + exp(-((x-8)^2+(y-6)^2)/4) - exp(-((x-7)^2+(y-2)^2)/0.8) - exp(-((x-4)^2+(y-8)^2)/1.5)) }
+gwrpar3 <- function(x, y) { return( exp(-(y-2*(x-1))^2/3) + exp(-(3*(y-3)-x)^2/10) - 1) }
 
 
 # --------------------------------------------
