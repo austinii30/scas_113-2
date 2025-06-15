@@ -34,29 +34,28 @@ for (gf in gwrparfuncs) {
     plot2d(x, y, z, xlim, ylim, zlim, ke=FALSE) 
 }
 dev.off()
-stop()
 
 # --------------------------------------------
 # sample location
 # --------------------------------------------
-#pdf(outpath("dat-location.pdf"))
-#for (i in 1:length(datlm)) {
-#    plot(x=datlm[[i]][, "x"], y=datlm[[i]][, "y"]) 
-#}
-#dev.off()
+pdf(outpath("dat-location.pdf"))
+for (i in 1:length(datlm)) {
+    plot(x=datlm[[i]][, "x"], y=datlm[[i]][, "y"]) 
+}
+dev.off()
 
 
 # --------------------------------------------
 # LM: sample response
 # --------------------------------------------
-#pdf(outpath("lm-response.pdf"), width=8, height=6.5)
-#for (i in 1:length(datlm)) {
-#    x <- datlm[[i]][, "x"]
-#    y <- datlm[[i]][, "y"]
-#    z <- datlm[[i]][, "response"]
-#    plot2d(x, y, z, xlim, ylim)
-#}
-#dev.off()
+pdf(outpath("lm-response.pdf"), width=8, height=6.5)
+for (i in 1:length(datlm)) {
+    x <- datlm[[i]][, "x"]
+    y <- datlm[[i]][, "y"]
+    z <- datlm[[i]][, "response"]
+    plot2d(x, y, z, xlim, ylim)
+}
+dev.off()
 
 
 # --------------------------------------------
