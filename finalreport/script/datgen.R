@@ -7,12 +7,11 @@
 
 source(file.path(this.path::this.dir(), "utils.R"))
 
-seed <- 2025 
+set.seed(2025)
 
 #N <- 700      # size for each sample
-#nsub <- 1000  # amount of samples
-N <- 700
-nsub <- 20
+N <- 500
+nsub <- 1000 
 gridsize <- 10  # size of study area
 errsig <- 0.5  # sigma for the random error
 varnames <- c("response", "x", "y", "x1", "x2", "x3", "error")

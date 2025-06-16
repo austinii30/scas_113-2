@@ -16,11 +16,11 @@ import("myGWRfunc.R")
 
 load(datpath("datlm.RData"))
 datlm <- lapply(datlm, data.frame) 
-datlm.gw <- lapply(datlm, function(d) { rownames(d) <- 1:nrow(d); coordinates(d) <- c("x", "y"); return(d) }) 
+datlm.gw <- lapply(datlm, function(d) { coordinates(d) <- c("x", "y"); return(d) }) 
 
 load(datpath("datgwr.RData")) 
 datgwr <- lapply(datgwr, data.frame)
-datgwr.gw <- lapply(datgwr, function(d) { rownames(d) <- 1:nrow(d); coordinates(d) <- c("x", "y"); return(d) })
+datgwr.gw <- lapply(datgwr, function(d) { coordinates(d) <- c("x", "y"); return(d) })
 
 dat    <- list(datlm, datgwr)
 dat.gw <- list(datlm.gw, datgwr.gw)
@@ -30,10 +30,16 @@ kernel <- "gaussian"
 
 set.seed(2025)
 
+results <- lapply(1:(2*length(datlm)), function(x) return(NULL))
+datnames <- c("LM", "GWR")
+
 # data for LM or GWR
 for (i in 1:2) {
     # for each subdata
-    for (j in 1:length(datlm)) {
+    #for (j in 1:length(datlm)) {
+    #simres <- lapply(1:length(datlm), function(j) { 
+    simres <- lapply(1:10, function(j) { 
+        sink(outpath("junk"))
         # data for my code and GWmodel
         dlm <- dat[[ i ]][[ j ]]
         dgw <- dat.gw[[ i ]][[ j ]]
@@ -61,23 +67,17 @@ for (i in 1:2) {
         # -----------------------------  
         # AICc scores
         # -----------------------------  
-        AICc.gwr <- gwgwr$GW.diagnostic$AICc 
+        AICc.gwr <- mygwr$AICs[1, 1]
+        #AICc.gwr <- gwgwr$GW.diagnostic$AICc 
         AICc.lm  <- AICc(modellm)
-        print(AICc.lm)
-        #aic <- AIC(modellm)
-        #n <- nobs(modellm); k <- length(coef(modellm))
-        #aic <- aic + ((2 * k * (k+1)) / (n - k - 1))
-        #print(aic)
-        #stop()
-        #AICc <- mygwr$AICs[1, 1]
+        #print(AICc.lm)
         AICs <- c(AICc.lm, AICc.gwr); names(AICs) <- c("lm", "gwr")
 
         # -----------------------------  
-        # BIC scores
+        # BIC scores (unused)
         # -----------------------------  
         #bic <- bbmle::BIC(modellm)
         #print(bic)
-        #stop()
         
         # -----------------------------  
         # Moran's I
@@ -100,8 +100,19 @@ for (i in 1:2) {
         seCompare <- mygwr$seCompare 
         
         res <- list(bwAICc=bwAICc, AICcs=AICs, MoransI=morani, montecarlo=mcAICc, LRT=lrt, seCompare=seCompare)
-        print(res)
-    
-        stop()
-    }
+        #print(res); stop()
+        idx <- (i-1)*length(datlm) + j
+        sink()
+        cat(datnames[i], ", data ", idx, " done.    \r", sep="")
+        #print(res)
+        #stop()
+        return(res)
+        #results[[idx]] <- res
+    })
+    cat("\n")
+        
+    #from <- (i-1)*length(datlm)
+    #to   <- i*length(datlm)
+    #results[from:to] <- simres
+    save(simres, file=datpath(paste0("simRes-", datnames[i], ".RData")))
 }
