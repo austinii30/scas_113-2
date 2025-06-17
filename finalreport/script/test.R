@@ -15,11 +15,23 @@ source(file.path(this.path::this.dir(), "utils.R"))
 import("func.R")
 import("myGWRfunc.R")
 
-load(datpath("datlm.RData"))
+RNGkind("L'Ecuyer-CMRG")
+seed <- 2025
+set.seed(seed)
+c1 <- makeCluster(7)
+clusterSetRNGStream(c1, seed)
+
+sigmas <- c("0.1", "0.5", "1", "1.5", "2", "2.5", "3")
+#sigmas <- c("0.1", "1", "1.5", "2", "2.5", "3")
+for (s in sigmas)  {
+
+cat("Sigma: ", s, "    \n", sep="")
+
+load(datpath(paste0("datlm-sigma-", s, ".RData")))
 datlm <- lapply(datlm, data.frame) 
 datlm.gw <- lapply(datlm, function(d) { coordinates(d) <- c("x", "y"); return(d) }) 
 
-load(datpath("datgwr.RData")) 
+load(datpath(paste0("datgwr-sigma-", s, ".RData")))
 datgwr <- lapply(datgwr, data.frame)
 datgwr.gw <- lapply(datgwr, function(d) { coordinates(d) <- c("x", "y"); return(d) })
 
@@ -32,13 +44,9 @@ kernel <- "gaussian"
 #results <- lapply(1:(2*length(datlm)), function(x) return(NULL))
 datnames <- c("LM", "GWR")
 
-RNGkind("L'Ecuyer-CMRG")
-seed <- 2025
-set.seed(seed)
-c1 <- makeCluster(9)
-clusterSetRNGStream(c1, seed)
 
 exetimes <- list()
+
 
 # data for LM or GWR
 for (i in 1:2) {
@@ -133,9 +141,10 @@ for (i in 1:2) {
     #from <- (i-1)*length(datlm)
     #to   <- i*length(datlm)
     #results[from:to] <- simres
-    save(simres, file=datpath(paste0("simRes-", datnames[i], "-", length(datlm), ".RData")))
+    save(simres, file=datpath(paste0("simRes-", datnames[i], "-", length(datlm), "-sigma-", s, ".RData")))
     cat("Done simulating ", datnames[i], ", time spent: ", exetimes[[i]],
         " seconds. \n\n", sep="")
 }
-save(exetimes, file=datpath("exetime.RData"))
+save(exetimes, file=datpath(paste0("exetime-sigma-", s, ".RData")))
+}
 stopCluster(c1)

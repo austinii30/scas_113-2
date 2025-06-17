@@ -14,6 +14,12 @@ N <- 500
 nsub <- 1000 
 gridsize <- 10  # size of study area
 errsig <- 0.5  # sigma for the random error
+#errsig <- 0.1  # sigma for the random error
+#errsig <- 1  # sigma for the random error
+#errsig <- 1.5  # sigma for the random error
+#errsig <- 2  # sigma for the random error
+#errsig <- 2.5  # sigma for the random error
+#errsig <- 3  # sigma for the random error
 varnames <- c("response", "x", "y", "x1", "x2", "x3", "error")
 lmparas <- c(0.3, 0.7, -0.8, 0.5)  # betas for LM
 gwrpar0 <- function(x, y) { return( (x-y)/10 ) }
@@ -59,5 +65,5 @@ for (i in 1:nsub) {
     colnames(subdat.gwr) <- c(varnames, "gp0", "gp1", "gp2", "gp3")
     datgwr[[i]] <- subdat.gwr
 }
-save(datlm, file=datpath("datlm.RData"))
-save(datgwr, file=datpath("datgwr.RData"))
+save(datlm, file=datpath(paste0("datlm-sigma-", errsig, ".RData")))
+save(datgwr, file=datpath(paste0("datgwr-sigma-", errsig, ".RData")))
