@@ -8,7 +8,8 @@
 library(GWmodel)
 #devtools::install_version("MuMIn", version = "1.47.1", repos = "https://cran.r-project.org")
 library(MuMIn)  # for AICc()
-library(ape)  # for moran()
+library(ape)    # for moran()
+library(parallel)
 
 source(file.path(this.path::this.dir(), "utils.R"))
 import("func.R")
@@ -28,21 +29,38 @@ dat.gw <- list(datlm.gw, datgwr.gw)
 model <- formula(response ~ x1 + x2 + x3)
 kernel <- "gaussian"
 
-set.seed(2025)
-
-results <- lapply(1:(2*length(datlm)), function(x) return(NULL))
+#results <- lapply(1:(2*length(datlm)), function(x) return(NULL))
 datnames <- c("LM", "GWR")
+
+RNGkind("L'Ecuyer-CMRG")
+seed <- 2025
+set.seed(seed)
+c1 <- makeCluster(9)
+clusterSetRNGStream(c1, seed)
+
+exetimes <- list()
 
 # data for LM or GWR
 for (i in 1:2) {
+    cat("Begin simulation for ", datnames[i], ". \n", sep="")
+    begtime <- Sys.time()
+
+    clusterExport(c1, ls(), envir=environment()) 
+    clusterExport(c1, ls(envir=.GlobalEnv), envir=.GlobalEnv) 
+
     # for each subdata
     #for (j in 1:length(datlm)) {
     #simres <- lapply(1:length(datlm), function(j) { 
-    simres <- lapply(1:10, function(j) { 
-        sink(outpath("junk"))
+    #simres <- lapply(1:10, function(j) { 
+    #simres <- parLapply(c1, 1:50, function(j) { 
+    simres <- parLapply(c1, 1:length(datlm), function(j) { 
+        #sink(outpath("junk"))
         # data for my code and GWmodel
         dlm <- dat[[ i ]][[ j ]]
         dgw <- dat.gw[[ i ]][[ j ]]
+        library(GWmodel)
+        library(MuMIn)  # for AICc()
+        library(ape)    # for moran()
 
         # -----------------------------  
         # Fit global regression
@@ -60,8 +78,8 @@ for (i in 1:2) {
         mygwr <- GWR(model, dlm, c("x", "y"), bwAICc, seCompare=TRUE, AICs=TRUE, doLRT=TRUE)
         #print(mygwr)
 
-        gwgwr <- gwr.basic(model, dgw, bw=bwAICc, kernel=kernel)
-        print(gwgwr)
+        #gwgwr <- gwr.basic(model, dgw, bw=bwAICc, kernel=kernel)
+        #print(gwgwr)
         #print(str(gwgwr))
 
         # -----------------------------  
@@ -82,12 +100,12 @@ for (i in 1:2) {
         # -----------------------------  
         # Moran's I
         # -----------------------------  
-        morani <- unlist(Moran.I(mygwr$residuals, invDist(distanceMtx(dlm[, 2:3]))))
+        morani <- unlist(Moran.I(modellm$residuals, invDist(distanceMtx(dlm[, 2:3]))))
         
         # -----------------------------  
         # Monte Carlo test (p-values)
         # -----------------------------  
-        mcAICc <- gwr.montecarlo(model, dgw, 99, kernel, bw=bwAICc)
+        mcAICc <- gwr.montecarlo(model, dgw, 199, kernel, bw=bwAICc)
 
         # -----------------------------  
         # Approximate LRT
@@ -102,17 +120,22 @@ for (i in 1:2) {
         res <- list(bwAICc=bwAICc, AICcs=AICs, MoransI=morani, montecarlo=mcAICc, LRT=lrt, seCompare=seCompare)
         #print(res); stop()
         idx <- (i-1)*length(datlm) + j
-        sink()
+        #sink()
         cat(datnames[i], ", data ", idx, " done.    \r", sep="")
-        #print(res)
-        #stop()
         return(res)
         #results[[idx]] <- res
     })
-    cat("\n")
+    #cat("\n")
+
+    endtime <- Sys.time()
+    exetimes[[i]] <- duration(endtime - begtime)
         
     #from <- (i-1)*length(datlm)
     #to   <- i*length(datlm)
     #results[from:to] <- simres
-    save(simres, file=datpath(paste0("simRes-", datnames[i], ".RData")))
+    save(simres, file=datpath(paste0("simRes-", datnames[i], "-", length(datlm), ".RData")))
+    cat("Done simulating ", datnames[i], ", time spent: ", exetimes[[i]],
+        " seconds. \n\n", sep="")
 }
+save(exetimes, file=datpath("exetime.RData"))
+stopCluster(c1)

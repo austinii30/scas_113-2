@@ -18,80 +18,11 @@ Fixed bandwidth: 0.880266 AICc value: 909.8441
 Fixed bandwidth: 0.8840542 AICc value: 909.8428 
 Fixed bandwidth: 0.8817129 AICc value: 909.8426 
 Fixed bandwidth: 0.8831599 AICc value: 909.8423 
-   ***********************************************************************
-   *                       Package   GWmodel                             *
-   ***********************************************************************
-   Program starts at: 2025-06-17 03:33:19 
-   Call:
-   gwr.basic(formula = model, data = dgw, bw = bwAICc, kernel = kernel)
-
-   Dependent (y) variable:  response
-   Independent variables:  x1 x2 x3
-   Number of data points: 500
-   ***********************************************************************
-   *                    Results of Global Regression                     *
-   ***********************************************************************
-
-   Call:
-    lm(formula = formula, data = data)
-
-   Residuals:
-     Min       1Q   Median       3Q      Max 
--2.62768 -0.54256  0.00177  0.59026  2.13863 
-
-   Coefficients:
-               Estimate Std. Error t value Pr(>|t|)    
-   (Intercept) -0.05470    0.10892  -0.502    0.616    
-   x1           0.00345    0.12644   0.027    0.978    
-   x2           0.20176    0.12817   1.574    0.116    
-   x3          -0.66493    0.12549  -5.299 1.76e-07 ***
-
-   ---Significance stars
-   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
-   Residual standard error: 0.8144 on 496 degrees of freedom
-   Multiple R-squared: 0.0563
-   Adjusted R-squared: 0.05059 
-   F-statistic: 9.863 on 3 and 496 DF,  p-value: 2.503e-06 
-   ***Extra Diagnostic information
-   Residual sum of squares: 328.9595
-   Sigma(hat): 0.8127492
-   AIC:  1219.602
-   AICc:  1219.723
-   BIC:  771.7479
-   ***********************************************************************
-   *          Results of Geographically Weighted Regression              *
-   ***********************************************************************
-
-   *********************Model calibration information*********************
-   Kernel function: gaussian 
-   Fixed bandwidth: 0.8826072 
-   Regression points: the same locations as observations are used.
-   Distance metric: Euclidean distance metric is used.
-
-   ****************Summary of GWR coefficient estimates:******************
-                  Min.   1st Qu.    Median   3rd Qu.   Max.
-   Intercept -0.873833 -0.352252  0.019548  0.264022 1.2039
-   x1        -0.898617 -0.236047  0.013870  0.190766 1.0759
-   x2        -1.112621 -0.101349  0.240157  0.455198 1.4090
-   x3        -1.710522 -1.059585 -0.799791 -0.473830 0.0685
-   ************************Diagnostic information*************************
-   Number of data points: 500 
-   Effective number of parameters (2trace(S) - trace(S'S)): 127.0021 
-   Effective degrees of freedom (n-2trace(S) + trace(S'S)): 372.9979 
-   AICc (GWR book, Fotheringham, et al. 2002, p. 61, eq 2.33): 909.8422 
-   AIC (GWR book, Fotheringham, et al. 2002,GWR p. 96, eq. 4.22): 774.9384 
-   BIC (GWR book, Fotheringham, et al. 2002,GWR p. 61, eq. 2.34): 749.1039 
-   Residual sum of squares: 114.9787 
-   R-square value:  0.6701551 
-   Adjusted R-square value:  0.5575443 
-
-   ***********************************************************************
-   Program stops at: 2025-06-17 03:33:19 
 
 Tests based on the Monte Carlo significance test
 
             p-value
-(Intercept)    0.05
-x1             0.96
-x2             0.67
-x3             0.77
+(Intercept)    0.07
+x1             0.97
+x2             0.73
+x3             0.81
