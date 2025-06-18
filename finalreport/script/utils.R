@@ -63,3 +63,6 @@ duration <- function (t, units="secs") {
     return(as.numeric(t, units=units))
 }
 
+pctg <- function (x, dec=2) {
+    return(round(x, dec))
+}
