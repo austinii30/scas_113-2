@@ -55,12 +55,12 @@ plot2d <- function (x, y, z,
     }
 
     # Plot with a square aspect ratio and a tall legend
-    par(mar = c(4.5, 5.5, 0.5, 6))  # Extra space on right for the legend
+    par(mar = c(4.5, 4.5, 0.5, 6))  # Extra space on right for the legend
 
     # draw the image without the legend
     image(dens$x, dens$y, dens$z,
           col = jet.colors(100),
-          xlab = "X", ylab = "", main = "",
+          xlab = "u", ylab = "", main = "",
           las = 1, yaxt="n",
           cex.axis=1.7, cex.lab=1.9,
           xlim=xlcd, ylim=ylcd, zlim=zlcd)
@@ -72,14 +72,14 @@ plot2d <- function (x, y, z,
            legend.mar = 5,
            legend.shrink = 1.0,       # Don't shrink legend
            axis.args=list(cex.axis=1.7),  # change legend number size
-           xlab = "X", ylab = "", main = "", 
+           xlab = "u", ylab = "", main = "", 
            las = 1, yaxt="n",
            cex.axis=1.7, cex.lab=1.9,
            xlim=xlcd, ylim=ylcd, zlim=zlcd)
 
     # custom y-axis labels and axis
     axis(2, las=1, cex.axis=1.7)
-    mtext("Y", side=2, line=4, cex=1.9) 
+    mtext("v", side=2, line=2.5, cex=1.9) 
 
     # Add contour lines if desired
     contour(dens, add = TRUE, drawlabels = FALSE, col = "black", lwd = 0.5)

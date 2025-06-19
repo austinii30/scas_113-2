@@ -29,14 +29,16 @@ rownames(MonteCarlo) <- c("LM.0", "LM.1", "LM.2", "LM.3",
                           "GWR.0", "GWR.1", "GWR.2", "GWR.3")
 
 sink("Analyze.txt", split=TRUE)
+for (tmidx in 1:length(tmodels)) {
+    pdf(outpath(paste0(tmidx, "-truemodel.pdf")), width=12, height=16)  # 13.3
+    par(mar = c(3, 4, 0.5, 1), mgp = c(4, 1, 0), mfrow=c(7, 4))
 for (sidx in 1:length(sigmas)) {
     s <- sigmas[sidx]
 
-    pdf(outpath(paste0(s, "-sec.pdf")), width=12, height=3.8)
+    #pdf(outpath(paste0(s, "-sec.pdf")), width=12, height=3.8)
     #, fonts="CNS1")
-    par(mar = c(3, 4, 0.5, 1), mgp = c(4, 1, 0), mfrow=c(2, 4))
+    #par(mar = c(3, 4, 0.5, 1), mgp = c(4, 1, 0), mfrow=c(2, 4))
 
-    for (tmidx in 1:length(tmodels)) {
         tm <- tmodels[tmidx]
         load(file=outpath(paste0("organized-", tm, "-sigma-", s, ".RData")))
         dat <- combres
@@ -86,7 +88,7 @@ for (sidx in 1:length(sigmas)) {
             # custom y-axis labels and axis
             axis(1, cex.axis=cex.axis)
             mtext("", side=1, line=3, cex=cex.lab) 
-            abline(v=1, col="red", lwd=2)
+            abline(v=1, col="red", lwd=2.5)
         }
         SEdat <- colSums(SEdat > secth)
         SEC[from:to, sidx] <- SEdat

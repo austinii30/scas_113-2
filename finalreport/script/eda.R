@@ -24,16 +24,19 @@ gwrparfuncs <- c(gwrpar0, gwrpar1, gwrpar2, gwrpar3)
 # --------------------------------------------
 # exact plots for each covariate
 # --------------------------------------------
-pdf(outpath("gwr-covariates.pdf"), width=8, height=6.5)
+idx <- 0
 for (gf in gwrparfuncs) {
+    pdf(outpath(paste0("gwr-covariate-", idx, ".pdf")), width=8, height=6.5)
     x <- seq(0, 10, length.out=200)
     y <- seq(0, 10, length.out=200)
     z <- outer(x, y, gf)
     print(max(z))
     print(min(z))
     plot2d(x, y, z, xlim, ylim, zlim, ke=FALSE) 
+    dev.off()
+    idx <- idx + 1
 }
-dev.off()
+stop()
 
 # --------------------------------------------
 # sample location
