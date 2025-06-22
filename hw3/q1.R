@@ -2,8 +2,6 @@
 # Question 1 for hw3
 ########################
 
-#library(EFAtools)  # for PARALLEL analysis
-#library(Rfast) # for colVars
 library(showtext)  # display chinese in .pdf files
 showtext_auto()
 

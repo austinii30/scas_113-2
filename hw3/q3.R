@@ -17,10 +17,10 @@ for (n1 in lb:ub) {
         cat("N1: ", n1, ", N2: ", n2, "\n", sep="")
         for (i in 1:nIter) {
             # draw samples 
-            #x1 <- rexp(n1)
-            x1 <- runif(n1)
-            #x2 <- rexp(n2)
-            x2 <- runif(n2)
+            x1 <- rexp(n1)
+            #x1 <- runif(n1)
+            x2 <- rexp(n2)
+            #x2 <- runif(n2)
         
             # rank the observations
             rk <- rank(c(x1, x2))
@@ -44,5 +44,3 @@ colnames(cv) <- rownames(cv) <- lb:ub
 cv
 
 write.csv(cv, paste0("./q3_table_a", alpha, ".csv"))
-
-

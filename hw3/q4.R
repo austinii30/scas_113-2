@@ -139,5 +139,3 @@ legend("topright", legend=c("Theoretical", "Sample"),
        bty="n", cex=cex.text)
 
 dev.off()
-
-
