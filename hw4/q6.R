@@ -35,7 +35,7 @@ cat(m, ", estimate: ", mcRes.mu, ", variance: ", mcRes.var, "\n", sep="")
 
 
 # important sampling
-# assume p(x) is a half normal: f(x) = sqrt(2/pi) * exp{-x^2/2}
+# assume p(x) follows shifted exponential
 isRes <- parSapply(c1, 1:nIter, FUN = function (i) {
         #simX <- sapply(1:nrv, function (j) { return(abs(rnorm(n))) })
         simX <- sapply(1:nrv, function (j) { return(rexp(n, rate=0.8)) })
@@ -49,7 +49,6 @@ isRes <- parSapply(c1, 1:nIter, FUN = function (i) {
 isRes.mu <- mean(isRes); isRes.var <- var(isRes)
 m <- "Important Sampling"
 cat(m, ", estimate: ", isRes.mu, ", variance: ", isRes.var, "\n", sep="")
-
 
 
 # Control Variable
@@ -68,6 +67,3 @@ cvRes <- parSapply(c1, 1:nIter, FUN = function (i) {
 cvRes.mu <- mean(cvRes); cvRes.var <- var(cvRes)
 m <- "Control Variable"
 cat(m, ", estimate: ", cvRes.mu, ", variance: ", cvRes.var, "\n", sep="")
-
-
-
