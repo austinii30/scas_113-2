@@ -9,8 +9,6 @@ library(MASS)         # for kde2d()
 library(fields)       # For image.plot (better legends)
 library(RColorBrewer) # For color palette
 library(grDevices)    # For colorRampPalette
-library(ks)
-library(np)
 
 jet.colors <- colorRampPalette(
     c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", 
@@ -86,6 +84,7 @@ plot2d <- function (x, y, z,
 }
 
 
+# Inverse distance matrix
 invDist <- function (mtx) {
     mtx <- 1/mtx
     diag(mtx) <- 0

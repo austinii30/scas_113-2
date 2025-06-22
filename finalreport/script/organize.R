@@ -1,6 +1,6 @@
 ###########################################################
 # Filename: organize.R
-# Purpose : Organize the results of the justification approaches
+# Purpose : Organize the results of 'test.R'
 # Author  : Austin Liu
 # Date    : 2025/06/18
 ###########################################################

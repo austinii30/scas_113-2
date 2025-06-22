@@ -9,8 +9,7 @@ source(file.path(this.path::this.dir(), "utils.R"))
 
 set.seed(2025)
 
-#N <- 700      # size for each sample
-N <- 500
+N <- 500      # size for each sample
 nsub <- 1000 
 gridsize <- 10  # size of study area
 errsig <- 0.5  # sigma for the random error

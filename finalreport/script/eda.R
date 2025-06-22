@@ -1,6 +1,6 @@
 ###########################################################
 # Filename: eda.R
-# Purpose : Examine generated spatial data
+# Purpose : plot spatial data
 # Author  : Austin Liu
 # Date    : 2025/06/14
 ###########################################################
@@ -20,6 +20,7 @@ gwrpar1 <- function(x, y) { return( (sin(x/0.5)+cos(y/0.8))/2 ) }
 gwrpar2 <- function(x, y) { return( exp(-((x-2.5)^2+(y-3)^2)/2) + exp(-((x-8)^2+(y-6)^2)/4) - exp(-((x-7)^2+(y-2)^2)/0.8) - exp(-((x-4)^2+(y-8)^2)/1.5)) }
 gwrpar3 <- function(x, y) { return( exp(-(y-2*(x-1))^2/3) + exp(-(3*(y-3)-x)^2/10) - 1) }
 gwrparfuncs <- c(gwrpar0, gwrpar1, gwrpar2, gwrpar3)
+
 
 # --------------------------------------------
 # exact plots for each covariate
@@ -72,6 +73,7 @@ for (i in 1:length(datgwr)) {
     plot2d(x, y, z, xlim, ylim)
 }
 dev.off()
+
 
 # --------------------------------------------
 # GWR: covariates
